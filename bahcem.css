@@ -576,3 +576,274 @@ button:active, .btn:active { transform: scale(0.97); }
 }
 
 code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-radius:6px; }
+
+/* =====================================================
+   TOP BAR (tema + kullanıcı tek satırda)
+   ===================================================== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: var(--theme-bar-bg);
+  border-bottom: 1px solid var(--theme-bar-bd);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--user-bar-tx);
+  min-width: 0;
+}
+
+.user-info img {
+  width: 26px; height: 26px;
+  border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+
+.user-info span {
+  max-width: 120px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 600;
+}
+
+/* =====================================================
+   EKRANLAR
+   ===================================================== */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* =====================================================
+   BAHÇE LİSTESİ
+   ===================================================== */
+.garden-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.garden-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+
+.garden-card:hover { transform: translateY(-1px); box-shadow: 0 10px 32px rgba(0,0,0,0.13); }
+.garden-card:active { transform: scale(0.98); }
+
+.garden-card-icon {
+  font-size: 2rem;
+  width: 52px; height: 52px;
+  background: var(--surface2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.garden-card-body { flex: 1; min-width: 0; }
+.garden-card-body h3 { margin: 0 0 3px; font-size: 1.05rem; font-weight: 800; color: var(--accent-dark); }
+.garden-card-sub { margin: 0; font-size: 0.82rem; color: var(--muted); }
+.garden-card-arrow { color: var(--muted); flex-shrink: 0; }
+
+/* =====================================================
+   BİTKİLER HEADER
+   ===================================================== */
+.plants-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 0;
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: none; padding: 6px 4px;
+  font-size: 0.88rem; font-weight: 700; color: var(--accent);
+  cursor: pointer; border-radius: 8px;
+  flex-shrink: 0;
+}
+.btn-back:hover { background: var(--surface2); }
+
+.garden-title-wrap {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; min-width: 0;
+}
+
+.garden-title-text {
+  margin: 0; font-size: 1.1rem; font-weight: 800;
+  color: var(--accent-dark);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.btn-icon {
+  background: none; border: none;
+  padding: 5px; cursor: pointer;
+  color: var(--muted); border-radius: 8px; flex-shrink: 0;
+}
+.btn-icon:hover { background: var(--surface2); color: var(--accent); }
+
+.btn-sm { padding: 7px 14px; font-size: 0.88rem; border-radius: 10px; flex-shrink: 0; }
+
+/* =====================================================
+   BİTKİ KARTLARI (iyileştirilmiş)
+   ===================================================== */
+.plant-name-row {
+  display: flex; flex-direction: column; gap: 1px;
+  margin-bottom: 5px;
+}
+
+.plant-name-row h3 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--accent-dark); }
+.plant-latin { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+
+.info-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 8px; border-radius: 999px;
+  font-size: 0.74rem; font-weight: 700;
+}
+
+.info-light {
+  background: #fff8e1; color: #e65100;
+}
+
+[data-theme="dark"] .info-light { background: #3e2e00; color: #ffcc80; }
+[data-theme="blue"] .info-light { background: #e8f4fd; color: #0d47a1; }
+
+/* =====================================================
+   BOŞ DURUM (iyileştirilmiş)
+   ===================================================== */
+.empty-icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* =====================================================
+   BİTKİ EKLEME MODAL
+   ===================================================== */
+.modal-wide { max-width: 580px; }
+
+.plant-search-row {
+  display: flex; gap: 8px; margin-bottom: 14px;
+}
+
+.plant-search-row input {
+  flex: 1;
+  font: inherit; padding: 10px 12px;
+  border-radius: 10px; border: 2px solid var(--border);
+  background: var(--input-bg); color: var(--text);
+  font-size: 0.95rem;
+}
+.plant-search-row input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+
+/* Popüler bitkiler grid */
+.plant-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.popular-plant-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 6px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer; font-size: 0.8rem; font-weight: 700;
+  color: var(--text);
+  transition: border-color 0.12s, transform 0.1s, background 0.12s;
+}
+.popular-plant-btn:hover { border-color: var(--accent); background: var(--surface); transform: translateY(-1px); }
+.popular-plant-btn:active { transform: scale(0.96); }
+.popular-emoji { font-size: 1.6rem; line-height: 1; }
+.popular-name { font-size: 0.72rem; text-align: center; color: var(--muted); }
+
+/* Önizleme kart */
+.plant-preview-card {
+  display: flex;
+  gap: 14px;
+  background: var(--surface2);
+  border: 2px solid var(--accent-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.ppc-img-wrap {
+  width: 90px; height: 90px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--thumb-grad);
+  display: flex; align-items: center; justify-content: center;
+}
+.ppc-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+.ppc-info { flex: 1; min-width: 0; }
+
+.ppc-names { margin-bottom: 4px; }
+.ppc-name-tr  { display: block; font-weight: 800; font-size: 1rem; color: var(--accent-dark); }
+.ppc-name-lat { display: block; font-size: 0.75rem; font-style: italic; color: var(--muted); }
+
+.ppc-excerpt {
+  font-size: 0.78rem; color: var(--muted);
+  line-height: 1.4; margin: 4px 0 8px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.ppc-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+
+.ppc-badge {
+  font-size: 0.72rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px;
+}
+.ppc-badge-light { background: #fff8e1; color: #e65100; }
+.ppc-badge-water { background: var(--badge-ok-bg); color: var(--badge-ok-tx); }
+
+[data-theme="dark"] .ppc-badge-light { background: #3e2e00; color: #ffcc80; }
+[data-theme="dark"] .ppc-badge-water { background: var(--badge-ok-bg); color: var(--badge-ok-tx); }
+
+.ppc-watering-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.82rem; color: var(--muted); font-weight: 700;
+}
+
+.ppc-watering-ctrl {
+  display: flex; align-items: center; gap: 6px;
+}
+
+.ppc-step {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  font-size: 1.1rem; font-weight: 800;
+  color: var(--accent); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; line-height: 1;
+}
+.ppc-step:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+#ppc-interval-val {
+  font-size: 1.2rem; font-weight: 800;
+  color: var(--accent-dark); min-width: 24px; text-align: center;
+}
+.ppc-day-label { font-size: 0.78rem; color: var(--muted); }
+
+.plant-add-status {
+  min-height: 24px; font-size: 0.85rem;
+  color: var(--muted); margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
