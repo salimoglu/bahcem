@@ -419,7 +419,7 @@ const PLANTS_DB = [
   { id:"lonicera_shrub",   nameTr:"Sarı Hanımeli",               nameLat:"Lonicera nitida",               emoji:"🌿", light:"Yarı gölge",    waterDays:7,  care:"Küçük oval yapraklar. Çok iyi çit bitkisi. Hızlı büyür." },
   { id:"pittosporum",      nameTr:"Pittosporum",                  nameLat:"Pittosporum tobira",            emoji:"🌿", light:"Yarı gölge",    waterDays:7,  care:"Parlak yapraklar, güzel kokulu çiçekler. Sahile dayanıklı." },
   { id:"choisya",          nameTr:"Meksika Portakalı",           nameLat:"Choisya ternata",               emoji:"🌿", light:"Yarı gölge",    waterDays:7,  care:"Portakal kokulu beyaz çiçekler. İlkbahar ve sonbaharda açar." },
-];
+,
 
   // ══════════════════════════════════════════
   // SU BİTKİLERİ
