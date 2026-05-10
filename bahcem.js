@@ -350,7 +350,7 @@ function renderCatalog(query) {
     grid.innerHTML = `<p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
     grid.classList.remove("hidden"); return;
   }
-  grid.innerHTML = results.slice(0, 60).map((p,i) =>
+  grid.innerHTML = results.map((p,i) =>
     `<button class="popular-plant-btn" data-idx="${PLANTS_DB.indexOf(p)}" type="button">
       <span class="popular-emoji">${p.emoji}</span>
       <span class="popular-name">${esc(p.nameTr)}</span>
