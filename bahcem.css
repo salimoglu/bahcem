@@ -336,37 +336,60 @@ button:active, .btn:active { transform: scale(0.97); }
 /* =====================================================
    BİTKİ GRID
    ===================================================== */
-.plant-grid { display: flex; flex-direction: column; gap: 12px; }
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 500px) {
+  .plant-grid { grid-template-columns: repeat(3, 1fr); }
+}
 
 .plant-card {
-  display: grid;
-  grid-template-columns: 88px 1fr;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 12px;
+  overflow: hidden;
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border: 2.5px solid var(--border);
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s, border-color 0.2s;
+  transition: transform 0.1s, box-shadow 0.15s, border-color 0.2s;
+  aspect-ratio: auto;
+}
+.plant-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.14); }
+.plant-card:active { transform: scale(0.97); }
+.plant-card.card-ok   { border-color: #66bb6a; }
+.plant-card.card-warn { border-color: #42a5f5; }
+.plant-card-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: var(--thumb-grad);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .plant-card:focus-visible { outline: 3px solid var(--accent-light); outline-offset: 2px; }
 
 .plant-thumb {
-  width: 88px; height: 88px;
-  border-radius: 12px;
-  background: var(--thumb-grad);
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  flex-shrink: 0;
+  display: block;
 }
 
 .plant-thumb.placeholder {
-  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
 }
 
-.plant-meta h3   { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; color: var(--accent-dark); }
+.plant-meta h3 { margin: 0 0 2px; font-size: 0.9rem; font-weight: 800; color: var(--accent-dark); }
 .plant-meta .excerpt {
   margin: 0 0 8px; font-size: 0.82rem; color: var(--muted); line-height: 1.35;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
@@ -847,3 +870,56 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   color: var(--muted); margin-bottom: 4px;
   display: flex; align-items: center; gap: 6px;
 }
+
+/* ── Kare bitki kartı meta alanı ── */
+.plant-meta {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+.plant-meta h3      { margin: 0; font-size: 0.88rem; font-weight: 800; color: var(--accent-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plant-latin        { font-size: 0.68rem; color: var(--muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plant-meta .badge  { font-size: 0.7rem; padding: 3px 7px; margin-top: 2px; align-self: flex-start; }
+.plant-meta .info-badge { font-size: 0.68rem; padding: 2px 7px; align-self: flex-start; }
+
+/* ── Arama inputu ── */
+.plant-search-input {
+  width: 100%;
+  font: inherit;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+.plant-search-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+
+/* ── Önizleme kartındaki emoji fallback ── */
+.ppc-emoji-fallback {
+  font-size: 3rem;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.ppc-img-wrap {
+  position: relative;
+  width: 90px; height: 90px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--thumb-grad);
+}
+.ppc-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  position: relative; z-index: 1;
+}
+
+/* ── Yeşil / Mavi sulama çerçevesi ── */
+.card-ok   { border-color: #66bb6a !important; }
+.card-warn { border-color: #42a5f5 !important; }
+[data-theme="dark"] .card-ok   { border-color: #388e3c !important; }
+[data-theme="dark"] .card-warn { border-color: #1565c0 !important; }
