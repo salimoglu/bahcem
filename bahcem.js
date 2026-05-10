@@ -106,7 +106,10 @@ function fmtDate(iso) {
 
 // ===== EKRAN GEÇİŞİ =====
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+  document.querySelectorAll(".screen").forEach(s => {
+    s.classList.toggle("active", s.id === id);
+    s.classList.remove("hidden");
+  });
 }
 
 function showApp(name) {
