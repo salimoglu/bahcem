@@ -50,14 +50,16 @@ function toast(msg) {
 }
 
 function waterStatus(p) {
-  const base = p.lastWateredAt ? new Date(p.lastWateredAt).getTime() : new Date(p.createdAt).getTime();
+  // Hiç sulanmamışsa hemen uyar
+  if (!p.lastWateredAt) return { key:"late", label:"Henüz sulanmadı", pct: 100 };
   const days = Math.max(1, Number(p.wateringIntervalDays) || 7);
+  const base = new Date(p.lastWateredAt).getTime();
   const next = base + days * 86400000;
   const diff = Math.round((next - Date.now()) / 86400000);
-  if (diff < 0)  return { key:"late",  label:`${Math.abs(diff)} gün gecikti`,  pct: 100 };
+  if (diff < 0)   return { key:"late",  label:`${Math.abs(diff)} gün gecikti`,  pct: 100 };
   if (diff === 0) return { key:"today", label:"Bugün sulanmalı",                pct: 100 };
   if (diff === 1) return { key:"soon",  label:"Yarın sulanmalı",                pct: Math.round((1/days)*100) };
-  return               { key:"ok",    label:`${diff} gün sonra`,               pct: Math.round(((days-diff)/days)*100) };
+  return                 { key:"ok",    label:`${diff} gün sonra`,              pct: Math.round(((days-diff)/days)*100) };
 }
 
 function fmtDate(iso) {
@@ -130,7 +132,13 @@ function renderGardens() {
       <div class="garden-card-icon">🌿</div>
       <div class="garden-card-body">
         <h3>${esc(g.name)}</h3>
-        <p class="garden-card-sub">${g.plantCount||0} bitki</p>
+        <div class="garden-card-stats">
+          <span class="gc-stat">${g.plantCount||0} bitki</span>
+          ${(g.plantCount||0) > 0 ? `
+          <span class="gc-stat gc-ok">✓ ${g.okCount||0} tamam</span>
+          ${(g.needWater||0) > 0 ? `<span class="gc-stat gc-warn">💧 ${g.needWater} sulama</span>` : ""}
+          ` : ""}
+        </div>
       </div>
       <svg class="garden-card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>`).join("");
@@ -186,7 +194,11 @@ function listenPlants(gid) {
   unsubPlants = plantsCol(gid).orderBy("createdAt","desc").onSnapshot(snap => {
     plants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderPlants();
-    gardensCol().doc(gid).update({ plantCount: plants.length }).catch(()=>{});
+    // Sulama istatistiklerini Firestore'a kaydet (bahçe kartında göstermek için)
+    const total   = plants.length;
+    const needWater = plants.filter(p => waterStatus(p).key !== "ok").length;
+    const okCount   = total - needWater;
+    gardensCol().doc(gid).update({ plantCount: total, needWater, okCount }).catch(()=>{});
   });
 }
 
@@ -258,7 +270,25 @@ function openPlantDetail(pid) {
       <button type="button" class="btn btn-primary"   id="btn-det-water">💧 Suladım</button>
       <button type="button" class="btn btn-secondary" id="btn-det-save">Aralığı kaydet</button>
       <button type="button" class="btn btn-danger"    id="btn-det-del">Sil</button>
-    </div>`;
+    </div>
+    ${(p.wateringHistory&&p.wateringHistory.length) ? `
+    <div class="water-history">
+      <div class="water-history-title">💧 Sulama Geçmişi</div>
+      <div class="water-history-list">
+        ${[...p.wateringHistory].reverse().slice(0,10).map((iso,i) => {
+          const d = new Date(iso);
+          const dateStr = d.toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"});
+          const timeStr = d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+          return `<div class="water-history-row ${i===0?"wh-latest":""}">
+            <span class="wh-dot"></span>
+            <span class="wh-date">${dateStr}</span>
+            <span class="wh-time">${timeStr}</span>
+          </div>`;
+        }).join("")}
+        ${p.wateringHistory.length > 10 ? `<div class="wh-more">+ ${p.wateringHistory.length-10} daha…</div>` : ""}
+      </div>
+    </div>` : ""}
+  `;
 
   let detInterval = p.wateringIntervalDays || 7;
   document.getElementById("det-step-down").onclick = () => {
@@ -270,8 +300,13 @@ function openPlantDetail(pid) {
     document.getElementById("det-interval-val").textContent = detInterval;
   };
   document.getElementById("btn-det-water").onclick = async () => {
-    await plantsCol(currentGardenId).doc(pid).update({ lastWateredAt: new Date().toISOString() });
-    toast("Sulama kaydedildi 💧"); document.getElementById("modal-plant-detail").classList.remove("show");
+    const now = new Date().toISOString();
+    const history = [...(p.wateringHistory||[]), now];
+    if (history.length > 30) history.splice(0, history.length - 30); // son 30 kayıt
+    await plantsCol(currentGardenId).doc(pid).update({ lastWateredAt: now, wateringHistory: history });
+    // local güncelle (modal yeniden açılacak)
+    p.lastWateredAt = now; p.wateringHistory = history;
+    toast("Sulama kaydedildi 💧"); openPlantDetail(pid);
   };
   document.getElementById("btn-det-save").onclick = async () => {
     await plantsCol(currentGardenId).doc(pid).update({ wateringIntervalDays: detInterval });
@@ -411,6 +446,7 @@ async function savePlant() {
       wateringIntervalDays: plantInterval,
       wikiUrl:             plantDraft.wikiUrl || "",
       lastWateredAt:       null,
+      wateringHistory:     [],
       createdAt:           new Date().toISOString()
     });
     closeAddPlant();

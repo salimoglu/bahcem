@@ -923,3 +923,61 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 .card-warn { border-color: #42a5f5 !important; }
 [data-theme="dark"] .card-ok   { border-color: #388e3c !important; }
 [data-theme="dark"] .card-warn { border-color: #1565c0 !important; }
+
+/* ── Bahçe kartı istatistik satırı ── */
+.garden-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+.gc-stat {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--muted);
+}
+.gc-ok   { background: var(--badge-ok-bg);   color: var(--badge-ok-tx); }
+.gc-warn { background: #e3f2fd;              color: #1565c0; }
+[data-theme="dark"] .gc-warn { background: #0d2540; color: #64b5f6; }
+
+/* ── Sulama geçmişi ── */
+.water-history {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.water-history-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+.water-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.water-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+.water-history-row:last-child { border-bottom: none; }
+.water-history-row.wh-latest .wh-date { color: var(--accent-dark); font-weight: 800; }
+.wh-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.wh-latest .wh-dot { background: #42a5f5; }
+.wh-date { flex: 1; color: var(--text); }
+.wh-time { color: var(--muted); font-size: 0.75rem; }
+.wh-more { font-size: 0.75rem; color: var(--muted); padding: 6px 0 0 18px; }
