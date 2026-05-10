@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2e7d32" />
+  <meta name="description" content="Bitkileriniz için koleksiyon, Vikipedi bilgi kartları ve sulaşma takibi." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Bahçem" />
+  <title>Bahçem · Bitki ve sulaşma takibi</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="bahcem.css?v=20260510bahcem" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="app-header">
+      <img src="icons/icon-192.png" width="52" height="52" alt="Bahçem" />
+      <div class="title-block">
+        <h1>Bahçem</h1>
+        <p>Vikipedi ile bilgi kartı · Sulaşma hatırlatması</p>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button type="button" id="btn-open-add" class="btn btn-primary">+ Bitki ekle</button>
+    </div>
+
+    <main>
+      <div id="empty-state" class="empty">
+        <h2>Henüz bitki yok</h2>
+        <p>İlk bitkinizi ekleyin; isim yazınca Vikipedi’den Türkçe veya İngilizce özet ve fotoğraf çekilir.</p>
+        <button type="button" class="btn btn-primary btn-block" id="btn-open-add-empty">Bitki ekle</button>
+      </div>
+
+      <div id="plant-list" class="plant-grid"></div>
+    </main>
+
+    <p class="footer-hint">
+      Veriler yalnızca bu cihazda saklanır (tarayıcı depolama). Telefonda “Ana ekrana ekle” ile uygulama gibi kullanabilirsiniz.
+      İkonları kendi Bahçem görselinizle <code>bahcem/icons/</code> içinde değiştirebilirsiniz.
+    </p>
+  </div>
+
+  <div id="modal-add" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+    <div class="modal">
+      <h2 id="modal-add-title">Yeni bitki</h2>
+      <div class="field">
+        <label for="field-query">Ara (ör. Monstera, sukulent, Lavanta)</label>
+        <input type="text" id="field-query" autocomplete="off" placeholder="Bitki veya yaygın ad" />
+      </div>
+      <button type="button" class="btn btn-secondary btn-block" id="btn-fetch">Vikipedi'den bilgi getir</button>
+
+      <ul id="search-results" class="search-results hidden" role="listbox" aria-label="Arama sonuçları"></ul>
+
+      <div class="field" style="margin-top:14px">
+        <label for="field-nick">Liste adı</label>
+        <input type="text" id="field-nick" placeholder="Bahçede nasıl görünsün?" />
+      </div>
+      <div class="field">
+        <label for="field-interval">Sulaşma aralığı (gün)</label>
+        <input type="number" id="field-interval" min="1" max="90" value="7" />
+      </div>
+
+      <div id="field-preview" class="preview-box"><p>Kısa özet için yukarıdan arama yapın.</p></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modal-add-close">Vazgeç</button>
+        <button type="button" class="btn btn-primary" id="btn-save-plant">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-detail" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="modal">
+      <h2 id="detail-title" class="sr-only">Bitki detayı</h2>
+      <div id="detail-content"></div>
+      <div class="modal-actions" style="margin-top:12px">
+        <button type="button" class="btn btn-ghost" id="modal-detail-close">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <style>
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+    code { font-size:0.85em; background:#e8f5e9; padding:2px 6px; border-radius:6px; }
+  </style>
+
+  <script src="bahcem.js?v=20260510bahcem" defer></script>
+</body>
+</html>
