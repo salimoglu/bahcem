@@ -322,41 +322,52 @@ function openPlantDetail(pid) {
 
 // ─── BİTKİ EKLEME ───
 function openAddPlant() {
-  plantDraft = null; plantInterval = 7;
+  plantDraft = null; plantInterval = 7; activeCat = "all";
   document.getElementById("field-plant-search").value = "";
   document.getElementById("plant-add-status").textContent = "";
   document.getElementById("plant-preview-card").classList.add("hidden");
   document.getElementById("btn-save-plant").disabled = true;
   document.getElementById("ppc-interval-val").textContent = "7";
-  renderCatalog("");
+  // Kategori sekmelerini sıfırla
+  document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === "all"));
+  renderCatalog("", "all");
   document.getElementById("modal-add-plant").classList.add("show");
   setTimeout(() => document.getElementById("field-plant-search").focus(), 120);
 }
 function closeAddPlant() { document.getElementById("modal-add-plant").classList.remove("show"); }
 
-// Veritabanından arama + render
-function renderCatalog(query) {
-  const q = query.trim().toLocaleLowerCase("tr");
-  const results = q
-    ? PLANTS_DB.filter(p =>
-        p.nameTr.toLocaleLowerCase("tr").includes(q) ||
-        p.nameLat.toLocaleLowerCase("tr").includes(q) ||
-        (p.care||"").toLocaleLowerCase("tr").includes(q)
-      )
-    : PLANTS_DB;
+// Aktif kategori
+let activeCat = "all";
+
+// Veritabanından arama + kategori filtresi + render
+function renderCatalog(query, cat) {
+  if (cat !== undefined) activeCat = cat;
+  const q = (query || document.getElementById("field-plant-search").value || "").trim().toLocaleLowerCase("tr");
+
+  let results = PLANTS_DB;
+  if (activeCat && activeCat !== "all") {
+    results = results.filter(p => p.category === activeCat);
+  }
+  if (q) {
+    results = results.filter(p =>
+      p.nameTr.toLocaleLowerCase("tr").includes(q) ||
+      p.nameLat.toLocaleLowerCase("tr").includes(q) ||
+      (p.care||"").toLocaleLowerCase("tr").includes(q)
+    );
+  }
 
   const grid = document.getElementById("plant-search-results");
   if (!results.length) {
     grid.innerHTML = `<p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
-    grid.classList.remove("hidden"); return;
+    return;
   }
-  grid.innerHTML = results.map((p,i) =>
-    `<button class="popular-plant-btn" data-idx="${PLANTS_DB.indexOf(p)}" type="button">
+  grid.innerHTML = results.map(p => {
+    const idx = PLANTS_DB.indexOf(p);
+    return `<button class="popular-plant-btn" data-idx="${idx}" type="button">
       <span class="popular-emoji">${p.emoji}</span>
       <span class="popular-name">${esc(p.nameTr)}</span>
-    </button>`
-  ).join("");
-  grid.classList.remove("hidden");
+    </button>`;
+  }).join("");
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
     btn.addEventListener("click", () => selectPlantFromDB(PLANTS_DB[Number(btn.dataset.idx)]));
   });
@@ -482,6 +493,15 @@ function wireOnce() {
   document.getElementById("btn-add-plant-empty").addEventListener("click", openAddPlant);
   document.getElementById("modal-plant-close").addEventListener("click",   closeAddPlant);
   document.getElementById("modal-add-plant").addEventListener("click", e => { if(e.target.id==="modal-add-plant") closeAddPlant(); });
+
+  // Kategori sekmeleri
+  document.getElementById("cat-tabs").addEventListener("click", e => {
+    const tab = e.target.closest(".cat-tab");
+    if (!tab) return;
+    document.querySelectorAll(".cat-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    renderCatalog("", tab.dataset.cat);
+  });
 
   // Canlı arama
   document.getElementById("field-plant-search").addEventListener("input", e => {

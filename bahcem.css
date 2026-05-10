@@ -606,17 +606,35 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
    TOP BAR (tema + kullanıcı tek satırda)
    ===================================================== */
 .top-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 14px;
+  padding: 5px 10px;
   background: var(--theme-bar-bg);
   border-bottom: 1px solid var(--theme-bar-bd);
   position: sticky;
   top: 0;
   z-index: 40;
-  gap: 10px;
+  gap: 8px;
 }
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: var(--accent-dark);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  justify-content: center;
+}
+.top-bar-brand img {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.top-bar-brand span { white-space: nowrap; }
+.top-bar .user-info { justify-content: flex-end; }
 
 .user-info {
   display: flex;
@@ -983,3 +1001,50 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 .wh-date { flex: 1; color: var(--text); }
 .wh-time { color: var(--muted); font-size: 0.75rem; }
 .wh-more { font-size: 0.75rem; color: var(--muted); padding: 6px 0 0 18px; }
+
+/* ── Ekran başlık satırı ── */
+.screen-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-top: 4px;
+}
+.screen-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+}
+
+/* ── Kategori sekmeleri ── */
+.cat-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+
+.cat-tab {
+  flex-shrink: 0;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cat-tab:hover { border-color: var(--accent-light); color: var(--accent-dark); }
+.cat-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}

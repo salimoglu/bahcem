@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"/>
-  <link rel="stylesheet" href="bahcem.css?v=20260511b"/>
+  <link rel="stylesheet" href="bahcem.css?v=20260512"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -43,12 +43,17 @@
 
   <div id="app-screen" style="display:none">
 
+    <!-- ── ÜST ÇUBUK ── -->
     <div class="top-bar">
       <div class="theme-btns">
         <button class="theme-btn active" data-t="light" title="Açık"  aria-label="Açık tema"></button>
         <button class="theme-btn"        data-t="dark"  title="Koyu"  aria-label="Koyu tema"></button>
         <button class="theme-btn"        data-t="blue"  title="Mavi"  aria-label="Mavi tema"></button>
       </div>
+      <a href="." class="top-bar-brand" title="Sayfayı yenile">
+        <img src="icons/logo-header.png" alt="Bahçem"/>
+        <span>Bahçem</span>
+      </a>
       <div class="user-info">
         <img id="user-photo" src="" alt=""/>
         <span id="user-name"></span>
@@ -56,17 +61,13 @@
       </div>
     </div>
 
-    <!-- BAHÇELER -->
+    <!-- ── BAHÇELER EKRANI ── -->
     <div id="screen-gardens" class="screen active">
       <div class="wrap">
-        <header class="app-header">
-          <img src="icons/logo-header.png" width="52" height="52" alt="Bahçem"/>
-          <div class="title-block">
-            <h1>Bahçem</h1>
-            <p>Bahçelerini yönet</p>
-          </div>
+        <div class="screen-title-row">
+          <h2 class="screen-title">Bahçelerim</h2>
           <button type="button" id="btn-add-garden" class="btn btn-primary btn-sm">+ Bahçe ekle</button>
-        </header>
+        </div>
         <div id="gardens-empty" class="empty hidden">
           <div class="empty-icon">🌱</div>
           <h2>Henüz bahçe yok</h2>
@@ -77,7 +78,7 @@
       </div>
     </div>
 
-    <!-- BAHÇENİN İÇİ -->
+    <!-- ── BAHÇENİN İÇİ ── -->
     <div id="screen-plants" class="screen">
       <div class="wrap">
         <div class="plants-header">
@@ -103,9 +104,9 @@
       </div>
     </div>
 
-  </div>
+  </div><!-- /app-screen -->
 
-  <!-- MODAL: BAHÇE -->
+  <!-- ── MODAL: BAHÇE ── -->
   <div id="modal-garden" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal">
       <h2 id="modal-garden-title">Yeni bahçe</h2>
@@ -120,12 +121,39 @@
     </div>
   </div>
 
-  <!-- MODAL: BİTKİ EKLE -->
+  <!-- ── MODAL: BİTKİ EKLE ── -->
   <div id="modal-add-plant" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal modal-wide">
       <h2>Bitki ekle</h2>
-      <input type="text" id="field-plant-search" class="plant-search-input" autocomplete="off" placeholder="🔍 Bitki adı ile filtrele… (Monstera, Gül, Domates…)"/>
+
+      <!-- Arama -->
+      <input type="text" id="field-plant-search" class="plant-search-input"
+             autocomplete="off" placeholder="🔍 Tüm bitkiler içinde ara…"/>
+
+      <!-- Kategori sekmeleri -->
+      <div class="cat-tabs" id="cat-tabs">
+        <button class="cat-tab active" data-cat="all">Tümü</button>
+        <button class="cat-tab" data-cat="ic_mekan">🪴 İç Mekan</button>
+        <button class="cat-tab" data-cat="bahce_cicek">🌸 Bahçe</button>
+        <button class="cat-tab" data-cat="sebze_meyve">🍅 Sebze/Meyve</button>
+        <button class="cat-tab" data-cat="tibbi">🌿 Tıbbi</button>
+        <button class="cat-tab" data-cat="tropikal">🦜 Tropikal</button>
+        <button class="cat-tab" data-cat="agac_cali">🌳 Ağaç/Çalı</button>
+        <button class="cat-tab" data-cat="su">💧 Su Bitkileri</button>
+        <button class="cat-tab" data-cat="sarmasik">🍃 Sarmaşık</button>
+        <button class="cat-tab" data-cat="soganyumru">🧅 Soğan/Yumru</button>
+        <button class="cat-tab" data-cat="kaya_alpine">🪨 Kaya/Alpine</button>
+        <button class="cat-tab" data-cat="cayir">🌾 Çayır</button>
+        <button class="cat-tab" data-cat="egreltiler">🌿 Eğreltiler</button>
+        <button class="cat-tab" data-cat="baharat">☕ Baharat/Kahve</button>
+        <button class="cat-tab" data-cat="minyatur">🌺 Minyatür</button>
+        <button class="cat-tab" data-cat="teraryum">🫙 Teraryum</button>
+      </div>
+
+      <!-- Bitki grid -->
       <div id="plant-search-results" class="plant-search-grid"></div>
+
+      <!-- Önizleme kartı -->
       <div id="plant-preview-card" class="plant-preview-card hidden">
         <div class="ppc-img-wrap">
           <span id="ppc-emoji" class="ppc-emoji-fallback"></span>
@@ -152,6 +180,7 @@
           </div>
         </div>
       </div>
+
       <div id="plant-add-status" class="plant-add-status"></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost"   id="modal-plant-close">Vazgeç</button>
@@ -160,7 +189,7 @@
     </div>
   </div>
 
-  <!-- MODAL: BİTKİ DETAY -->
+  <!-- ── MODAL: BİTKİ DETAY ── -->
   <div id="modal-plant-detail" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal">
       <div id="plant-detail-content"></div>
@@ -171,6 +200,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="bahcem.js?v=20260511b" defer></script>
+  <script src="bahcem.js?v=20260512" defer></script>
 </body>
 </html>
