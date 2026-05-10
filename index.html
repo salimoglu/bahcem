@@ -4,45 +4,134 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2e7d32" />
-  <meta name="description" content="Bitkileriniz için koleksiyon, Vikipedi bilgi kartları ve sulaşma takibi." />
+  <meta name="description" content="Bitkileriniz için koleksiyon, Vikipedi bilgi kartları ve sulama takibi." />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Bahçem" />
-  <title>Bahçem · Bitki ve sulaşma takibi</title>
+  <title>Bahçem · Bitki ve sulama takibi</title>
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" />
-  <link rel="stylesheet" href="bahcem.css?v=20260510bahcem" />
+  <link rel="stylesheet" href="bahcem.css?v=20260510auth" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+      background: linear-gradient(160deg, #e8f5e9 0%, #f1f8e9 100%);
+    }
+    #login-screen img.login-logo {
+      width: 96px; height: 96px;
+      margin-bottom: 1.5rem;
+      border-radius: 24px;
+    }
+    #login-screen h1 { font-size: 2rem; font-weight: 800; color: #1b5e20; margin: 0 0 0.5rem; }
+    #login-screen p.tagline { color: #558b2f; font-size: 1rem; margin: 0 0 2.5rem; }
+    #btn-google-login {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border: 1.5px solid #c8e6c9; border-radius: 14px;
+      padding: 14px 28px; font-size: 1rem; font-weight: 700; color: #1b5e20;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: box-shadow 0.15s, transform 0.1s;
+    }
+    #btn-google-login:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.13); transform: translateY(-1px); }
+    #btn-google-login svg { width: 24px; height: 24px; flex-shrink: 0; }
+    #login-error { color: #c62828; font-size: 0.9rem; margin-top: 1rem; min-height: 1.5em; }
+    .user-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; background: #f1f8e9;
+      border-bottom: 1px solid #c8e6c9; font-size: 0.85rem; color: #33691e;
+    }
+    .user-bar img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+    .user-bar .user-name { flex: 1; font-weight: 600; }
+    #btn-logout {
+      background: none; border: 1px solid #a5d6a7; border-radius: 8px;
+      padding: 4px 10px; font-size: 0.78rem; color: #2e7d32; cursor: pointer; font-weight: 600;
+    }
+    #btn-logout:hover { background: #e8f5e9; }
+    #loading-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 100vh; gap: 16px;
+      color: #558b2f; font-weight: 600;
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 4px solid #c8e6c9;
+      border-top-color: #2e7d32; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+    code { font-size:0.85em; background:#e8f5e9; padding:2px 6px; border-radius:6px; }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="app-header">
-      <img src="icons/icon-192.png" width="52" height="52" alt="Bahçem" />
-      <div class="title-block">
-        <h1>Bahçem</h1>
-        <p>Vikipedi ile bilgi kartı · Sulaşma hatırlatması</p>
-      </div>
-    </header>
 
-    <div class="toolbar">
-      <button type="button" id="btn-open-add" class="btn btn-primary">+ Bitki ekle</button>
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <span>Yükleniyor…</span>
+  </div>
+
+  <div id="login-screen" style="display:none">
+    <img class="login-logo" src="icons/icon-192.png" alt="Bahçem" />
+    <h1>🌿 Bahçem</h1>
+    <p class="tagline">Bitkilerini takip et, bakımlarını hiç unutma</p>
+    <button id="btn-google-login" type="button">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Google ile giriş yap
+    </button>
+    <p id="login-error"></p>
+  </div>
+
+  <div id="app-screen" style="display:none">
+    <div class="user-bar" id="user-bar">
+      <img id="user-photo" src="" alt="" />
+      <span class="user-name" id="user-name"></span>
+      <button type="button" id="btn-logout">Çıkış</button>
     </div>
 
-    <main>
-      <div id="empty-state" class="empty">
-        <h2>Henüz bitki yok</h2>
-        <p>İlk bitkinizi ekleyin; isim yazınca Vikipedi’den Türkçe veya İngilizce özet ve fotoğraf çekilir.</p>
-        <button type="button" class="btn btn-primary btn-block" id="btn-open-add-empty">Bitki ekle</button>
+    <div class="wrap">
+      <header class="app-header">
+        <img src="icons/icon-192.png" width="52" height="52" alt="Bahçem" />
+        <div class="title-block">
+          <h1>Bahçem</h1>
+          <p>Vikipedi ile bilgi kartı · Sulama hatırlatması</p>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <button type="button" id="btn-open-add" class="btn btn-primary">+ Bitki ekle</button>
       </div>
 
-      <div id="plant-list" class="plant-grid"></div>
-    </main>
+      <main>
+        <div id="empty-state" class="empty">
+          <h2>Henüz bitki yok</h2>
+          <p>İlk bitkinizi ekleyin; isim yazınca Vikipedi'den Türkçe veya İngilizce özet ve fotoğraf çekilir.</p>
+          <button type="button" class="btn btn-primary btn-block" id="btn-open-add-empty">Bitki ekle</button>
+        </div>
+        <div id="plant-list" class="plant-grid"></div>
+      </main>
 
-    <p class="footer-hint">
-      Veriler yalnızca bu cihazda saklanır (tarayıcı depolama). Telefonda “Ana ekrana ekle” ile uygulama gibi kullanabilirsiniz.
-      İkonları kendi Bahçem görselinizle <code>bahcem/icons/</code> içinde değiştirebilirsiniz.
-    </p>
+      <p class="footer-hint">
+        Verileriniz buluta kaydedilir. Her cihazdan aynı Google hesabıyla giriş yaparak bitkilerinize ulaşabilirsiniz.
+      </p>
+    </div>
   </div>
 
   <div id="modal-add" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
@@ -53,20 +142,16 @@
         <input type="text" id="field-query" autocomplete="off" placeholder="Bitki veya yaygın ad" />
       </div>
       <button type="button" class="btn btn-secondary btn-block" id="btn-fetch">Vikipedi'den bilgi getir</button>
-
       <ul id="search-results" class="search-results hidden" role="listbox" aria-label="Arama sonuçları"></ul>
-
       <div class="field" style="margin-top:14px">
         <label for="field-nick">Liste adı</label>
         <input type="text" id="field-nick" placeholder="Bahçede nasıl görünsün?" />
       </div>
       <div class="field">
-        <label for="field-interval">Sulaşma aralığı (gün)</label>
+        <label for="field-interval">Sulama aralığı (gün)</label>
         <input type="number" id="field-interval" min="1" max="90" value="7" />
       </div>
-
       <div id="field-preview" class="preview-box"><p>Kısa özet için yukarıdan arama yapın.</p></div>
-
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="modal-add-close">Vazgeç</button>
         <button type="button" class="btn btn-primary" id="btn-save-plant">Kaydet</button>
@@ -86,11 +171,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <style>
-    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
-    code { font-size:0.85em; background:#e8f5e9; padding:2px 6px; border-radius:6px; }
-  </style>
-
-  <script src="bahcem.js?v=20260510bahcem" defer></script>
+  <script src="bahcem.js?v=20260510auth" defer></script>
 </body>
 </html>
