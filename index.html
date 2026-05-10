@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" />
-  <link rel="stylesheet" href="bahcem.css?v=20260510logo" />
+  <link rel="stylesheet" href="bahcem.css?v=20260510theme" />
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -100,6 +100,17 @@
   </div>
 
   <div id="app-screen" style="display:none">
+    <!-- Tema seçici çubuğu -->
+    <div class="theme-bar">
+      <span>Tema</span>
+      <div class="theme-btns">
+        <button class="theme-btn active" data-t="light" title="Açık"  aria-label="Açık tema"></button>
+        <button class="theme-btn"        data-t="dark"  title="Koyu"  aria-label="Koyu tema"></button>
+        <button class="theme-btn"        data-t="green" title="Yeşil" aria-label="Yeşil tema"></button>
+        <button class="theme-btn"        data-t="blue"  title="Mavi"  aria-label="Mavi tema"></button>
+      </div>
+    </div>
+
     <div class="user-bar" id="user-bar">
       <img id="user-photo" src="" alt="" />
       <span class="user-name" id="user-name"></span>
@@ -171,6 +182,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="bahcem.js?v=20260510logo" defer></script>
+  <script src="bahcem.js?v=20260510theme" defer></script>
 </body>
 </html>

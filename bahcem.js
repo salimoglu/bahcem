@@ -1,3 +1,31 @@
+// ===== TEMA SİSTEMİ =====
+(function() {
+  const THEME_KEY = "bahcem-theme";
+  const themes = ["light", "dark", "green", "blue"];
+
+  function applyTheme(t) {
+    if (!themes.includes(t)) t = "light";
+    document.documentElement.setAttribute("data-theme", t);
+    localStorage.setItem(THEME_KEY, t);
+    document.querySelectorAll(".theme-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.t === t);
+    });
+  }
+
+  // Sayfa yüklenince kayıtlı temayı hemen uygula
+  const saved = localStorage.getItem(THEME_KEY) || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+
+  // DOM hazır olunca buton olaylarını bağla
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".theme-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.t === saved);
+      btn.addEventListener("click", () => applyTheme(btn.dataset.t));
+    });
+  });
+})();
+
+
 // =============================================
 // BAHÇEM — Firebase Auth + Firestore Sürümü
 // =============================================
