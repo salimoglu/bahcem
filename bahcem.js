@@ -1,7 +1,7 @@
 // ===== TEMA SİSTEMİ =====
 (function() {
   const THEME_KEY = "bahcem-theme";
-  const themes = ["light", "dark", "green", "blue"];
+  const themes = ["light", "dark", "blue"];
 
   function applyTheme(t) {
     if (!themes.includes(t)) t = "light";

@@ -87,47 +87,6 @@
   --theme-bar-bd: #2e4d31;
 }
 
-/* ── YEŞİL TEMA ── */
-[data-theme="green"] {
-  --bg:           #f0faf0;
-  --surface:      #ffffff;
-  --surface2:     #e8f8e8;
-  --border:       #a5d6a7;
-  --accent:       #388e3c;
-  --accent-dark:  #1b5e20;
-  --accent-light: #c8e6c9;
-  --header-border:#2e7d32;
-  --text:         #0d2610;
-  --muted:        #4a7a4d;
-  --warn:         #f57c00;
-  --danger:       #d32f2f;
-  --badge-ok-bg:  #c8e6c9;
-  --badge-ok-tx:  #1b5e20;
-  --badge-warn-bg:#ffe0b2;
-  --badge-warn-tx:#f57c00;
-  --badge-err-bg: #ffcdd2;
-  --badge-err-tx: #d32f2f;
-  --modal-overlay:rgba(0,30,5,0.45);
-  --shadow:       0 8px 28px rgba(56,142,60,0.15);
-  --btn-grad:     linear-gradient(145deg,#43a047,#2e7d32);
-  --btn-shadow:   0 6px 18px rgba(56,142,60,0.4);
-  --input-bg:     #e8f8e8;
-  --search-border:#66bb6a;
-  --thumb-grad:   linear-gradient(160deg,#a5d6a7,#66bb6a);
-  --toast-bg:     #2e7d32;
-  --user-bar-bg:  #e8f8e8;
-  --user-bar-bd:  #a5d6a7;
-  --user-bar-tx:  #1b5e20;
-  --login-grad1:  #e8f8e8;
-  --login-grad2:  #f0faf0;
-  --login-h1:     #1b5e20;
-  --login-sub:    #388e3c;
-  --login-btn-bd: #a5d6a7;
-  --login-btn-tx: #1b5e20;
-  --theme-bar-bg: #ffffff;
-  --theme-bar-bd: #a5d6a7;
-}
-
 /* ── MAVİ TEMA ── */
 [data-theme="blue"] {
   --bg:           #e3f2fd;
@@ -218,12 +177,10 @@
 
 .theme-btn[data-t="light"]  { background: linear-gradient(135deg,#e8f5e9,#ffffff); box-shadow: inset 0 0 0 1px #c8e6c9; }
 .theme-btn[data-t="dark"]   { background: linear-gradient(135deg,#0d1f10,#1a2e1c); }
-.theme-btn[data-t="green"]  { background: linear-gradient(135deg,#43a047,#1b5e20); }
 .theme-btn[data-t="blue"]   { background: linear-gradient(135deg,#1976d2,#0d47a1); }
 
-.theme-btn[data-t="light"]::after { content:"☀️"; font-size:13px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.theme-btn[data-t="light"]::after { content:"🌿"; font-size:13px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
 .theme-btn[data-t="dark"]::after  { content:"🌙"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
-.theme-btn[data-t="green"]::after { content:"🌿"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
 .theme-btn[data-t="blue"]::after  { content:"💧"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
 
 /* Tooltip */
