@@ -32,6 +32,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
+// Formspree: https://formspree.io — yeni form oluşturup “form endpoint” ID’sini buraya yazın (örn. xvgw…).
+const FORMSPREE_FORM_ID = "YOUR_FORMSPREE_FORM_ID";
+
+const PREF_WATER_OVERRIDE = "bahcem-pref-water-override";
+const PREF_WATER_DAYS = "bahcem-pref-water-days";
+const PREF_COMPACT = "bahcem-pref-compact";
+
 let currentUser = null, gardens = [], plants = [];
 let currentGardenId = null;
 let unsubGardens = null, unsubPlants = null;
@@ -47,6 +54,120 @@ function toast(msg) {
   const el = document.getElementById("toast");
   el.textContent = msg; el.classList.add("show");
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2500);
+}
+
+function getPrefWaterOverride() {
+  return localStorage.getItem(PREF_WATER_OVERRIDE) === "1";
+}
+function getPrefWaterDays() {
+  const n = parseInt(localStorage.getItem(PREF_WATER_DAYS) || "7", 10);
+  return Math.min(90, Math.max(1, n || 7));
+}
+function intervalForNewPlant(dbPlant) {
+  if (getPrefWaterOverride()) return getPrefWaterDays();
+  return Math.max(1, Number(dbPlant.waterDays) || 7);
+}
+function applyCompactFromStorage() {
+  const app = document.getElementById("app-screen");
+  if (!app) return;
+  app.classList.toggle("app-compact", localStorage.getItem(PREF_COMPACT) === "1");
+  if (gardens.length) renderGardens();
+  if (plants.length) renderPlants();
+}
+function syncWaterDaysInputState() {
+  const elOv = document.getElementById("pref-water-override");
+  const elDays = document.getElementById("pref-water-days");
+  if (!elOv || !elDays) return;
+  elDays.disabled = !elOv.checked;
+}
+function openSettingsModal() {
+  document.getElementById("pref-water-override").checked = getPrefWaterOverride();
+  document.getElementById("pref-water-days").value = String(getPrefWaterDays());
+  document.getElementById("pref-compact").checked = localStorage.getItem(PREF_COMPACT) === "1";
+  syncWaterDaysInputState();
+  document.getElementById("modal-settings").classList.add("show");
+}
+function closeSettingsModal() {
+  document.getElementById("modal-settings").classList.remove("show");
+}
+function saveSettingsFromModal() {
+  let days = parseInt(document.getElementById("pref-water-days").value, 10);
+  if (!Number.isFinite(days)) days = 7;
+  days = Math.min(90, Math.max(1, days));
+  localStorage.setItem(PREF_WATER_DAYS, String(days));
+  localStorage.setItem(PREF_WATER_OVERRIDE, document.getElementById("pref-water-override").checked ? "1" : "0");
+  localStorage.setItem(PREF_COMPACT, document.getElementById("pref-compact").checked ? "1" : "0");
+  applyCompactFromStorage();
+  closeSettingsModal();
+  toast("Ayarlar kaydedildi ✓");
+}
+function openFeedbackModal() {
+  document.getElementById("field-feedback-msg").value = "";
+  const r = document.querySelector('#form-feedback input[name="feedback-type"][value="oneri"]');
+  if (r) r.checked = true;
+  document.getElementById("modal-feedback").classList.add("show");
+}
+function closeFeedbackModal() {
+  document.getElementById("modal-feedback").classList.remove("show");
+}
+
+async function submitFeedback(ev) {
+  ev.preventDefault();
+  const formId = String(FORMSPREE_FORM_ID || "").trim();
+  if (!formId || formId === "YOUR_FORMSPREE_FORM_ID") {
+    toast("Formspree form ID eklenmemiş. bahcem.js içinde FORMSPREE_FORM_ID ayarlayın.");
+    return;
+  }
+  const msg = document.getElementById("field-feedback-msg").value.trim();
+  if (!msg) {
+    toast("Lütfen mesaj yazın.");
+    return;
+  }
+  const typeRadio = document.querySelector('#form-feedback input[name="feedback-type"]:checked');
+  const type = typeRadio ? typeRadio.value : "oneri";
+  const subj = type === "sikayet" ? "Bahçem — Şikayet" : "Bahçem — Öneri";
+  const btn = document.getElementById("btn-feedback-send");
+  const prev = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Gönderiliyor…";
+  try {
+    const email = currentUser && currentUser.email ? currentUser.email : "";
+    if (!email) {
+      toast("E-posta bulunamadı; geri bildirim için oturum gerekli.");
+      return;
+    }
+    const name = currentUser && currentUser.displayName ? currentUser.displayName : "Bahçem kullanıcısı";
+    const uid = currentUser && currentUser.uid ? currentUser.uid : "";
+    const payload = {
+      name,
+      email,
+      _replyto: email,
+      message: msg + "\n\n---\nGönderen: " + email + "\nUID: " + (uid || "—"),
+      _subject: subj,
+      tip: type === "sikayet" ? "şikayet" : "öneri",
+    };
+    const res = await fetch(`https://formspree.io/f/${encodeURIComponent(formId)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      closeFeedbackModal();
+      toast("Mesajınız alındı, teşekkürler!");
+    } else {
+      const err =
+        (typeof data.error === "string" && data.error) ||
+        (data.errors && Object.values(data.errors).flat().filter(Boolean).join(" ")) ||
+        "Gönderilemedi. Daha sonra deneyin.";
+      toast(err);
+    }
+  } catch (e) {
+    toast("Bağlantı hatası: " + (e.message || "bilinmiyor"));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prev;
+  }
 }
 
 function waterStatus(p) {
@@ -104,7 +225,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById("user-name").textContent = user.displayName || user.email;
     if (user.photoURL) { ph.src = user.photoURL; ph.style.display = "block"; } else ph.style.display = "none";
     showApp("app-screen"); showScreen("screen-gardens");
-    listenGardens(); wireOnce(); registerSw();
+    listenGardens(); applyCompactFromStorage(); wireOnce(); registerSw();
   } else {
     currentUser = null; gardens = []; plants = [];
     if (unsubGardens) { unsubGardens(); unsubGardens = null; }
@@ -412,7 +533,7 @@ function showPlantPreview(dbPlant) {
     </div>
     <div class="preview-badges">
       <span class="ppc-badge ppc-badge-light">☀️ ${esc(dbPlant.light)}</span>
-      <span class="ppc-badge ppc-badge-water">💧 Her ${dbPlant.waterDays} günde bir</span>
+      <span class="ppc-badge ppc-badge-water">💧 Her ${intervalForNewPlant(dbPlant)} günde bir</span>
     </div>
     <div class="preview-care">${esc(dbPlant.care||"")}</div>
     <div id="preview-wiki-area" class="preview-wiki-loading">
@@ -433,7 +554,7 @@ function showPlantPreview(dbPlant) {
   document.getElementById("preview-close-btn").onclick = () => m.classList.remove("show");
   const selBtn = document.getElementById("preview-sel-btn");
   if (selBtn) selBtn.onclick = () => {
-    selectedPlants.set(dbPlant.id, { dbPlant, interval: dbPlant.waterDays, imageUrl: "" });
+    selectedPlants.set(dbPlant.id, { dbPlant, interval: intervalForNewPlant(dbPlant), imageUrl: "" });
     fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr).then(url => {
       if (selectedPlants.has(dbPlant.id)) selectedPlants.get(dbPlant.id).imageUrl = url;
     }).catch(()=>{});
@@ -536,7 +657,7 @@ function togglePlantSelect(dbPlant, btn) {
     btn.classList.remove("selected");
     btn.querySelector(".sel-check")?.remove();
   } else {
-    selectedPlants.set(dbPlant.id, { dbPlant, interval: dbPlant.waterDays, imageUrl: "" });
+    selectedPlants.set(dbPlant.id, { dbPlant, interval: intervalForNewPlant(dbPlant), imageUrl: "" });
     btn.classList.add("selected");
     if (!btn.querySelector(".sel-check")) {
       const chk = document.createElement("span");
@@ -691,6 +812,17 @@ function wireOnce() {
   document.getElementById("modal-plant-detail").addEventListener("click", e => {
     if(e.target.id==="modal-plant-detail") document.getElementById("modal-plant-detail").classList.remove("show");
   });
+
+  document.getElementById("btn-settings").addEventListener("click", openSettingsModal);
+  document.getElementById("modal-settings-close").addEventListener("click", closeSettingsModal);
+  document.getElementById("btn-settings-save").addEventListener("click", saveSettingsFromModal);
+  document.getElementById("modal-settings").addEventListener("click", e => { if (e.target.id === "modal-settings") closeSettingsModal(); });
+  document.getElementById("pref-water-override").addEventListener("change", syncWaterDaysInputState);
+
+  document.getElementById("btn-feedback").addEventListener("click", openFeedbackModal);
+  document.getElementById("modal-feedback-close").addEventListener("click", closeFeedbackModal);
+  document.getElementById("modal-feedback").addEventListener("click", e => { if (e.target.id === "modal-feedback") closeFeedbackModal(); });
+  document.getElementById("form-feedback").addEventListener("submit", submitFeedback);
 }
 
 async function registerSw() {

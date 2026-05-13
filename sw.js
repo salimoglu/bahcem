@@ -1,5 +1,5 @@
 // Service Worker - Cache temizle
-const CACHE = 'bahcem-v20260513';
+const CACHE = 'bahcem-v20260515';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
