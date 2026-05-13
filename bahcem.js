@@ -376,11 +376,78 @@ function renderCatalog(query, cat) {
     </button>`;
   }).join("");
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
-    btn.addEventListener("click", () => togglePlantSelect(PLANTS_DB[Number(btn.dataset.idx)], btn));
+    const dbPlant = PLANTS_DB[Number(btn.dataset.idx)];
+    // Kısa tık → seç/kaldır
+    btn.addEventListener("click", () => togglePlantSelect(dbPlant, btn));
+    // Long press → önizleme
+    let pressTimer = null;
+    btn.addEventListener("pointerdown", () => {
+      pressTimer = setTimeout(() => { pressTimer = null; showPlantPreview(dbPlant); }, 500);
+    });
+    btn.addEventListener("pointerup",   () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+    btn.addEventListener("pointerleave",() => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
+    btn.addEventListener("contextmenu", e => { e.preventDefault(); showPlantPreview(dbPlant); });
   });
 }
 
 
+
+
+// ─── BİTKİ ÖNİZLEME (long press) ───
+function showPlantPreview(dbPlant) {
+  const m = document.getElementById("modal-plant-preview");
+  const inGarden = plants.some(p => (p.nameTr||"").toLocaleLowerCase("tr") === dbPlant.nameTr.toLocaleLowerCase("tr"));
+  const alreadyTxt = inGarden ? '<span class="preview-already-tag">✓ Bahçende var</span>' : "";
+  const sel = selectedPlants.has(dbPlant.id);
+
+  document.getElementById("preview-content").innerHTML = `
+    <div class="preview-header">
+      <span class="preview-emoji">${dbPlant.emoji}</span>
+      <div class="preview-titles">
+        <span class="preview-name-tr">${esc(dbPlant.nameTr)}</span>
+        <span class="preview-name-lat">${esc(dbPlant.nameLat||"")}</span>
+      </div>
+      ${alreadyTxt}
+    </div>
+    <div class="preview-badges">
+      <span class="ppc-badge ppc-badge-light">☀️ ${esc(dbPlant.light)}</span>
+      <span class="ppc-badge ppc-badge-water">💧 Her ${dbPlant.waterDays} günde bir</span>
+    </div>
+    <p class="preview-care">${esc(dbPlant.care||"")}</p>
+    <div class="preview-actions">
+      ${inGarden
+        ? `<span class="preview-in-garden-note">Bu bitki zaten bahçende ekli.</span>`
+        : sel
+          ? `<button type="button" class="btn btn-ghost btn-sm" id="preview-desel-btn">Seçimi kaldır</button>`
+          : `<button type="button" class="btn btn-primary btn-sm" id="preview-sel-btn">+ Seç</button>`
+      }
+      <button type="button" class="btn btn-ghost btn-sm" id="preview-close-btn">Kapat</button>
+    </div>
+  `;
+
+  // Buton olayları
+  document.getElementById("preview-close-btn").onclick = () => m.classList.remove("show");
+  const selBtn = document.getElementById("preview-sel-btn");
+  if (selBtn) selBtn.onclick = () => {
+    selectedPlants.set(dbPlant.id, { dbPlant, interval: dbPlant.waterDays, imageUrl: "" });
+    fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr).then(url => {
+      if (selectedPlants.has(dbPlant.id)) selectedPlants.get(dbPlant.id).imageUrl = url;
+    }).catch(()=>{});
+    updateSelectionBar();
+    renderCatalog();
+    m.classList.remove("show");
+    toast(`${dbPlant.nameTr} seçildi`);
+  };
+  const deselBtn = document.getElementById("preview-desel-btn");
+  if (deselBtn) deselBtn.onclick = () => {
+    selectedPlants.delete(dbPlant.id);
+    updateSelectionBar();
+    renderCatalog();
+    m.classList.remove("show");
+  };
+
+  m.classList.add("show");
+}
 
 // Seç / kaldır
 function togglePlantSelect(dbPlant, btn) {
@@ -536,6 +603,11 @@ function wireOnce() {
 
   // Kaydet
   document.getElementById("btn-save-plant").addEventListener("click", savePlant);
+
+  // Önizleme modalı kapat (backdrop tık)
+  document.getElementById("modal-plant-preview").addEventListener("click", e => {
+    if (e.target.id === "modal-plant-preview") document.getElementById("modal-plant-preview").classList.remove("show");
+  });
 
   // Detay kapat
   document.getElementById("modal-detail-close").addEventListener("click", () =>
