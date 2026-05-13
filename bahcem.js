@@ -323,13 +323,13 @@ function openPlantDetail(pid) {
 // ─── BİTKİ EKLEME ───
 function openAddPlant() {
   selectedPlants.clear(); activeCat = "all";
-  document.getElementById("field-plant-search").value = "";
-  document.getElementById("plant-add-status").textContent = "";
+  const searchEl = document.getElementById("field-plant-search");
+  if (searchEl) searchEl.value = "";
   document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === "all"));
   renderCatalog("", "all");
   updateSelectionBar();
   document.getElementById("modal-add-plant").classList.add("show");
-  setTimeout(() => document.getElementById("field-plant-search").focus(), 120);
+  setTimeout(() => { if (searchEl) searchEl.focus(); }, 120);
 }
 function closeAddPlant() { document.getElementById("modal-add-plant").classList.remove("show"); }
 
@@ -515,11 +515,11 @@ function wireOnce() {
   // sulama aralığı: seçim çubuğundan yönetilir
 
   // Temizle
-  document.getElementById("btn-clear-sel").addEventListener("click", () => {
+  const clearBtn = document.getElementById("btn-clear-sel"); if (clearBtn) clearBtn.addEventListener("click", () => {
     selectedPlants.clear();
     updateSelectionBar();
     renderCatalog(); // seçim işaretlerini kaldır
-  });
+  });}
 
   // Kaydet
   document.getElementById("btn-save-plant").addEventListener("click", savePlant);
