@@ -395,25 +395,29 @@ function renderCatalog(query, cat) {
 
 // ─── BİTKİ ÖNİZLEME (long press) ───
 function showPlantPreview(dbPlant) {
-  const m = document.getElementById("modal-plant-preview");
+  const m   = document.getElementById("modal-plant-preview");
+  const box = document.getElementById("preview-content");
   const inGarden = plants.some(p => (p.nameTr||"").toLocaleLowerCase("tr") === dbPlant.nameTr.toLocaleLowerCase("tr"));
-  const alreadyTxt = inGarden ? '<span class="preview-already-tag">✓ Bahçende var</span>' : "";
   const sel = selectedPlants.has(dbPlant.id);
 
-  document.getElementById("preview-content").innerHTML = `
+  // İskelet göster, Wikipedia yüklenene kadar
+  box.innerHTML = `
     <div class="preview-header">
       <span class="preview-emoji">${dbPlant.emoji}</span>
       <div class="preview-titles">
         <span class="preview-name-tr">${esc(dbPlant.nameTr)}</span>
         <span class="preview-name-lat">${esc(dbPlant.nameLat||"")}</span>
       </div>
-      ${alreadyTxt}
+      ${inGarden ? '<span class="preview-already-tag">✓ Bahçende var</span>' : ""}
     </div>
     <div class="preview-badges">
       <span class="ppc-badge ppc-badge-light">☀️ ${esc(dbPlant.light)}</span>
       <span class="ppc-badge ppc-badge-water">💧 Her ${dbPlant.waterDays} günde bir</span>
     </div>
-    <p class="preview-care">${esc(dbPlant.care||"")}</p>
+    <div class="preview-care">${esc(dbPlant.care||"")}</div>
+    <div id="preview-wiki-area" class="preview-wiki-loading">
+      <span class="loader"></span> Wikipedia yükleniyor…
+    </div>
     <div class="preview-actions">
       ${inGarden
         ? `<span class="preview-in-garden-note">Bu bitki zaten bahçende ekli.</span>`
@@ -433,20 +437,69 @@ function showPlantPreview(dbPlant) {
     fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr).then(url => {
       if (selectedPlants.has(dbPlant.id)) selectedPlants.get(dbPlant.id).imageUrl = url;
     }).catch(()=>{});
-    updateSelectionBar();
-    renderCatalog();
+    updateSelectionBar(); renderCatalog();
     m.classList.remove("show");
     toast(`${dbPlant.nameTr} seçildi`);
   };
   const deselBtn = document.getElementById("preview-desel-btn");
   if (deselBtn) deselBtn.onclick = () => {
     selectedPlants.delete(dbPlant.id);
-    updateSelectionBar();
-    renderCatalog();
+    updateSelectionBar(); renderCatalog();
     m.classList.remove("show");
   };
 
   m.classList.add("show");
+
+  // Wikipedia'dan Türkçe özet çek (önce TR, olmadı EN)
+  fetchWikiPreview(dbPlant).then(wiki => {
+    const area = document.getElementById("preview-wiki-area");
+    if (!area) return; // modal kapandıysa
+    if (!wiki) {
+      area.innerHTML = "";
+      return;
+    }
+    area.className = "preview-wiki-area";
+    area.innerHTML = `
+      ${wiki.imageUrl ? `<img class="preview-wiki-img" src="${escA(wiki.imageUrl)}" alt="" onerror="this.style.display='none'"/>` : ""}
+      <div class="preview-wiki-text">
+        <div class="preview-wiki-label">🌐 Wikipedia</div>
+        <p class="preview-wiki-excerpt">${esc(wiki.excerpt)}</p>
+        <a class="preview-wiki-link" href="${escA(wiki.url)}" target="_blank" rel="noopener">
+          Vikipedi'de tam makaleyi oku ↗
+        </a>
+      </div>
+    `;
+  }).catch(() => {
+    const area = document.getElementById("preview-wiki-area");
+    if (area) area.innerHTML = "";
+  });
+}
+
+// Wikipedia özeti çek — TR önce, EN fallback
+async function fetchWikiPreview(dbPlant) {
+  const queries = [
+    { lang: "tr", q: dbPlant.nameTr },
+    { lang: "tr", q: dbPlant.nameLat },
+    { lang: "en", q: dbPlant.nameLat },
+    { lang: "en", q: dbPlant.nameTr },
+  ].filter(x => x.q);
+
+  for (const { lang, q } of queries) {
+    try {
+      const sumUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q.replace(/ /g,"_"))}`;
+      const res = await fetch(sumUrl);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data.type === "disambiguation" || data.type === "not_found" || !data.extract) continue;
+      if (data.extract.length < 50) continue; // çok kısa özet
+      return {
+        excerpt: data.extract.slice(0, 600) + (data.extract.length > 600 ? "…" : ""),
+        imageUrl: (data.originalimage?.source) || (data.thumbnail?.source) || "",
+        url: data.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(q.replace(/ /g,"_"))}`
+      };
+    } catch(e) { continue; }
+  }
+  return null;
 }
 
 // Seç / kaldır
