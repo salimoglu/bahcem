@@ -121,14 +121,21 @@
     </div>
   </div>
 
-  <!-- ── MODAL: BİTKİ EKLE ── -->
-  <div id="modal-add-plant" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal modal-wide">
-      <h2>Bitki ekle</h2>
+  <!-- ── MODAL: BİTKİ EKLE (yukarıdan açılır) ── -->
+  <div id="modal-add-plant" class="modal-backdrop modal-top-backdrop" role="dialog" aria-modal="true">
+    <div class="modal modal-top">
+
+      <!-- Başlık satırı -->
+      <div class="modal-top-header">
+        <h2>Bitki ekle</h2>
+        <button type="button" class="btn-icon" id="modal-plant-close" aria-label="Kapat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
 
       <!-- Arama -->
       <input type="text" id="field-plant-search" class="plant-search-input"
-             autocomplete="off" placeholder="🔍 Tüm bitkiler içinde ara…"/>
+             autocomplete="off" placeholder="🔍 Bitki adı ara…"/>
 
       <!-- Kategori sekmeleri -->
       <div class="cat-tabs" id="cat-tabs">
@@ -139,13 +146,13 @@
         <button class="cat-tab" data-cat="tibbi">🌿 Tıbbi</button>
         <button class="cat-tab" data-cat="tropikal">🦜 Tropikal</button>
         <button class="cat-tab" data-cat="agac_cali">🌳 Ağaç/Çalı</button>
-        <button class="cat-tab" data-cat="su">💧 Su Bitkileri</button>
+        <button class="cat-tab" data-cat="su">💧 Su</button>
         <button class="cat-tab" data-cat="sarmasik">🍃 Sarmaşık</button>
-        <button class="cat-tab" data-cat="soganyumru">🧅 Soğan/Yumru</button>
-        <button class="cat-tab" data-cat="kaya_alpine">🪨 Kaya/Alpine</button>
+        <button class="cat-tab" data-cat="soganyumru">🧅 Soğan</button>
+        <button class="cat-tab" data-cat="kaya_alpine">🪨 Kaya</button>
         <button class="cat-tab" data-cat="cayir">🌾 Çayır</button>
-        <button class="cat-tab" data-cat="egreltiler">🌿 Eğreltiler</button>
-        <button class="cat-tab" data-cat="baharat">☕ Baharat/Kahve</button>
+        <button class="cat-tab" data-cat="egreltiler">🌿 Eğrelti</button>
+        <button class="cat-tab" data-cat="baharat">☕ Baharat</button>
         <button class="cat-tab" data-cat="minyatur">🌺 Minyatür</button>
         <button class="cat-tab" data-cat="teraryum">🫙 Teraryum</button>
       </div>
@@ -153,39 +160,13 @@
       <!-- Bitki grid -->
       <div id="plant-search-results" class="plant-search-grid"></div>
 
-      <!-- Önizleme kartı -->
-      <div id="plant-preview-card" class="plant-preview-card hidden">
-        <div class="ppc-img-wrap">
-          <span id="ppc-emoji" class="ppc-emoji-fallback"></span>
-          <img id="ppc-img" src="" alt="" style="display:none"/>
-        </div>
-        <div class="ppc-info">
-          <div class="ppc-names">
-            <span id="ppc-name-tr"  class="ppc-name-tr"></span>
-            <span id="ppc-name-lat" class="ppc-name-lat"></span>
-          </div>
-          <p id="ppc-excerpt" class="ppc-excerpt"></p>
-          <div class="ppc-badges">
-            <span id="ppc-light"      class="ppc-badge ppc-badge-light"></span>
-            <span id="ppc-water-freq" class="ppc-badge ppc-badge-water"></span>
-          </div>
-          <div class="ppc-watering-row">
-            <label>Sulama:</label>
-            <div class="ppc-watering-ctrl">
-              <button type="button" class="ppc-step" id="ppc-step-down">−</button>
-              <span id="ppc-interval-val">7</span>
-              <span class="ppc-day-label">gün</span>
-              <button type="button" class="ppc-step" id="ppc-step-up">+</button>
-            </div>
-          </div>
-        </div>
+      <!-- Seçim çubuğu (sabit altta) -->
+      <div id="selection-bar" class="selection-bar hidden">
+        <span id="sel-count-label">0 bitki seçildi</span>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-sel">Temizle</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-save-plant" disabled>Ekle ✓</button>
       </div>
 
-      <div id="plant-add-status" class="plant-add-status"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost"   id="modal-plant-close">Vazgeç</button>
-        <button type="button" class="btn btn-primary" id="btn-save-plant" disabled>Bahçeye ekle</button>
-      </div>
     </div>
   </div>
 

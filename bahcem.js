@@ -36,7 +36,7 @@ let currentUser = null, gardens = [], plants = [];
 let currentGardenId = null;
 let unsubGardens = null, unsubPlants = null;
 let appWired = false;
-let plantDraft = null, plantInterval = 7;
+let selectedPlants = new Map(); // id → {dbPlant, interval, imageUrl}
 let searchTimeout = null;
 
 // ─── YARDIMCILAR ───
@@ -322,15 +322,12 @@ function openPlantDetail(pid) {
 
 // ─── BİTKİ EKLEME ───
 function openAddPlant() {
-  plantDraft = null; plantInterval = 7; activeCat = "all";
+  selectedPlants.clear(); activeCat = "all";
   document.getElementById("field-plant-search").value = "";
   document.getElementById("plant-add-status").textContent = "";
-  document.getElementById("plant-preview-card").classList.add("hidden");
-  document.getElementById("btn-save-plant").disabled = true;
-  document.getElementById("ppc-interval-val").textContent = "7";
-  // Kategori sekmelerini sıfırla
   document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === "all"));
   renderCatalog("", "all");
+  updateSelectionBar();
   document.getElementById("modal-add-plant").classList.add("show");
   setTimeout(() => document.getElementById("field-plant-search").focus(), 120);
 }
@@ -363,57 +360,56 @@ function renderCatalog(query, cat) {
   }
   grid.innerHTML = results.map(p => {
     const idx = PLANTS_DB.indexOf(p);
-    return `<button class="popular-plant-btn" data-idx="${idx}" type="button">
+    const sel = selectedPlants.has(p.id);
+    return `<button class="popular-plant-btn${sel?" selected":""}" data-idx="${idx}" data-pid="${p.id}" type="button">
+      ${sel ? '<span class="sel-check">✓</span>' : ''}
       <span class="popular-emoji">${p.emoji}</span>
       <span class="popular-name">${esc(p.nameTr)}</span>
     </button>`;
   }).join("");
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
-    btn.addEventListener("click", () => selectPlantFromDB(PLANTS_DB[Number(btn.dataset.idx)]));
+    btn.addEventListener("click", () => togglePlantSelect(PLANTS_DB[Number(btn.dataset.idx)], btn));
   });
 }
 
-// DB'den bitki seç — Wikimedia'dan görsel çek
-async function selectPlantFromDB(dbPlant) {
-  plantDraft = null;
-  document.getElementById("btn-save-plant").disabled = true;
-  document.getElementById("plant-preview-card").classList.add("hidden");
-  document.getElementById("plant-add-status").innerHTML = '<span class="loader"></span> Görsel yükleniyor…';
 
-  // Wikimedia Commons'tan güvenli görsel çek
-  let imageUrl = "";
-  try {
-    imageUrl = await fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr);
-  } catch(e) { /* görselsiz devam */ }
 
-  plantDraft = {
-    nameTr:    dbPlant.nameTr,
-    nameLat:   dbPlant.nameLat,
-    care:      dbPlant.care,
-    excerpt:   "",
-    imageUrl,
-    light:     dbPlant.light,
-    waterDays: dbPlant.waterDays,
-    emoji:     dbPlant.emoji,
-    wikiUrl:   `https://tr.wikipedia.org/wiki/${encodeURIComponent((dbPlant.nameLat||dbPlant.nameTr).replace(/ /g,"_"))}`
-  };
-  plantInterval = dbPlant.waterDays;
+// Seç / kaldır
+function togglePlantSelect(dbPlant, btn) {
+  if (selectedPlants.has(dbPlant.id)) {
+    selectedPlants.delete(dbPlant.id);
+    btn.classList.remove("selected");
+    btn.querySelector(".sel-check")?.remove();
+  } else {
+    selectedPlants.set(dbPlant.id, { dbPlant, interval: dbPlant.waterDays, imageUrl: "" });
+    btn.classList.add("selected");
+    if (!btn.querySelector(".sel-check")) {
+      const chk = document.createElement("span");
+      chk.className = "sel-check"; chk.textContent = "✓";
+      btn.prepend(chk);
+    }
+    // Arka planda görsel çek
+    fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr).then(url => {
+      if (selectedPlants.has(dbPlant.id)) {
+        selectedPlants.get(dbPlant.id).imageUrl = url;
+      }
+    }).catch(()=>{});
+  }
+  updateSelectionBar();
+}
 
-  // Kart doldur
-  const imgEl = document.getElementById("ppc-img");
-  if (imageUrl) { imgEl.src = imageUrl; imgEl.style.display = "block"; }
-  else          { imgEl.style.display = "none"; }
-
-  document.getElementById("ppc-emoji").textContent      = dbPlant.emoji;
-  document.getElementById("ppc-name-tr").textContent    = dbPlant.nameTr;
-  document.getElementById("ppc-name-lat").textContent   = dbPlant.nameLat || "";
-  document.getElementById("ppc-excerpt").textContent    = dbPlant.care || "";
-  document.getElementById("ppc-light").textContent      = dbPlant.light;
-  document.getElementById("ppc-water-freq").textContent = `Her ${dbPlant.waterDays} günde bir`;
-  document.getElementById("ppc-interval-val").textContent = String(plantInterval);
-  document.getElementById("plant-preview-card").classList.remove("hidden");
-  document.getElementById("plant-add-status").textContent = "";
-  document.getElementById("btn-save-plant").disabled = false;
+// Seçim çubuğunu güncelle
+function updateSelectionBar() {
+  const count = selectedPlants.size;
+  const bar   = document.getElementById("selection-bar");
+  const label = document.getElementById("sel-count-label");
+  if (count === 0) {
+    bar.classList.add("hidden");
+  } else {
+    bar.classList.remove("hidden");
+    label.textContent = count === 1 ? "1 bitki seçildi" : `${count} bitki seçildi`;
+  }
+  document.getElementById("btn-save-plant").disabled = count === 0;
 }
 
 // Wikimedia Commons API — güvenli telif hakkı temiz görseller
@@ -442,26 +438,33 @@ async function fetchWikimediaImage(searchTerm) {
 }
 
 async function savePlant() {
-  if (!plantDraft || !currentGardenId) return;
+  if (!selectedPlants.size || !currentGardenId) return;
   const btn = document.getElementById("btn-save-plant");
-  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  btn.disabled = true;
+  const count = selectedPlants.size;
+  btn.textContent = count > 1 ? `${count} bitki ekleniyor…` : "Ekleniyor…";
   try {
-    await plantsCol(currentGardenId).add({
-      nameTr:              plantDraft.nameTr,
-      nameLat:             plantDraft.nameLat || "",
-      care:                plantDraft.care    || "",
-      excerpt:             plantDraft.excerpt || "",
-      imageUrl:            plantDraft.imageUrl|| "",
-      light:               plantDraft.light   || "",
-      emoji:               plantDraft.emoji   || "🌿",
-      wateringIntervalDays: plantInterval,
-      wikiUrl:             plantDraft.wikiUrl || "",
-      lastWateredAt:       null,
-      wateringHistory:     [],
-      createdAt:           new Date().toISOString()
-    });
+    const col = plantsCol(currentGardenId);
+    const now = new Date().toISOString();
+    // Paralel kaydet
+    await Promise.all([...selectedPlants.values()].map(({ dbPlant, interval, imageUrl }) =>
+      col.add({
+        nameTr:              dbPlant.nameTr,
+        nameLat:             dbPlant.nameLat  || "",
+        care:                dbPlant.care     || "",
+        excerpt:             "",
+        imageUrl:            imageUrl         || "",
+        light:               dbPlant.light    || "",
+        emoji:               dbPlant.emoji    || "🌿",
+        wateringIntervalDays: interval,
+        wikiUrl:             `https://tr.wikipedia.org/wiki/${encodeURIComponent((dbPlant.nameLat||dbPlant.nameTr).replace(/ /g,"_"))}`,
+        lastWateredAt:       null,
+        wateringHistory:     [],
+        createdAt:           now
+      })
+    ));
     closeAddPlant();
-    toast("Bitki eklendi 🌿");
+    toast(count > 1 ? `${count} bitki eklendi 🌿` : "Bitki eklendi 🌿");
   } catch(e) {
     toast("Hata: " + e.message);
     btn.disabled = false; btn.textContent = "Bahçeye ekle";
@@ -509,14 +512,13 @@ function wireOnce() {
     searchTimeout = setTimeout(() => renderCatalog(e.target.value), 200);
   });
 
-  // Sulama aralığı
-  document.getElementById("ppc-step-down").addEventListener("click", () => {
-    plantInterval = Math.max(1, plantInterval - 1);
-    document.getElementById("ppc-interval-val").textContent = String(plantInterval);
-  });
-  document.getElementById("ppc-step-up").addEventListener("click", () => {
-    plantInterval = Math.min(90, plantInterval + 1);
-    document.getElementById("ppc-interval-val").textContent = String(plantInterval);
+  // sulama aralığı: seçim çubuğundan yönetilir
+
+  // Temizle
+  document.getElementById("btn-clear-sel").addEventListener("click", () => {
+    selectedPlants.clear();
+    updateSelectionBar();
+    renderCatalog(); // seçim işaretlerini kaldır
   });
 
   // Kaydet

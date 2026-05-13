@@ -1045,3 +1045,104 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   border-color: var(--accent);
   color: #fff;
 }
+
+/* ═══════════════════════════════════════
+   YUKARIDAN AÇILAN MODAL (bitki ekleme)
+   ═══════════════════════════════════════ */
+.modal-top-backdrop {
+  align-items: flex-start !important;
+  padding: 0 !important;
+}
+
+.modal-top {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0 0 18px 18px !important;
+  padding: 0 !important;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Başlık satırı */
+.modal-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-top-header h2 { margin: 0; font-size: 1rem; }
+
+/* Arama inputu — modal-top içinde */
+.modal-top .plant-search-input {
+  margin: 8px 12px 0;
+  width: calc(100% - 24px);
+  flex-shrink: 0;
+}
+
+/* Kategori sekmeleri — modal-top içinde */
+.modal-top .cat-tabs {
+  padding: 8px 12px 6px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* Bitki grid — kaydırılabilir alan */
+.modal-top .plant-search-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 12px 4px;
+  margin-bottom: 0;
+  max-height: none;
+}
+
+/* ── Seçim çubuğu ── */
+.selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-top: 2px solid var(--accent-light);
+  flex-shrink: 0;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+}
+.selection-bar #sel-count-label {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+
+/* ── Seçili bitki butonu ── */
+.popular-plant-btn {
+  position: relative;
+}
+.popular-plant-btn.selected {
+  border-color: var(--accent) !important;
+  background: var(--badge-ok-bg) !important;
+}
+.sel-check {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.55rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+@media (min-width: 600px) {
+  .modal-top { max-width: 560px; margin: 0 auto; border-radius: 0 0 18px 18px !important; }
+  .modal-top-backdrop { justify-content: center; }
+}
