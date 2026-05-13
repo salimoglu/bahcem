@@ -460,14 +460,9 @@ function showPlantPreview(dbPlant) {
     }
     area.className = "preview-wiki-area";
     area.innerHTML = `
-      ${wiki.imageUrl ? `<img class="preview-wiki-img" src="${escA(wiki.imageUrl)}" alt="" onerror="this.style.display='none'"/>` : ""}
-      <div class="preview-wiki-text">
-        <div class="preview-wiki-label">🌐 Wikipedia</div>
-        <p class="preview-wiki-excerpt">${esc(wiki.excerpt)}</p>
-        <a class="preview-wiki-link" href="${escA(wiki.url)}" target="_blank" rel="noopener">
-          Vikipedi'de tam makaleyi oku ↗
-        </a>
-      </div>
+      <a class="preview-wiki-link" href="${escA(wiki.url)}" target="_blank" rel="noopener">
+        🌐 Vikipedi'de oku ↗
+      </a>
     `;
   }).catch(() => {
     const area = document.getElementById("preview-wiki-area");
