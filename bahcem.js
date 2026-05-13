@@ -358,11 +358,19 @@ function renderCatalog(query, cat) {
     grid.innerHTML = `<p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
     return;
   }
+  // Bahçedeki mevcut bitki adları (küçük harfle karşılaştırma için)
+  const existingNames = new Set(plants.map(p => (p.nameTr||"").toLocaleLowerCase("tr")));
+
   grid.innerHTML = results.map(p => {
     const idx = PLANTS_DB.indexOf(p);
     const sel = selectedPlants.has(p.id);
-    return `<button class="popular-plant-btn${sel?" selected":""}" data-idx="${idx}" data-pid="${p.id}" type="button">
-      ${sel ? '<span class="sel-check">✓</span>' : ''}
+    const inGarden = existingNames.has(p.nameTr.toLocaleLowerCase("tr"));
+    let cls = "popular-plant-btn";
+    if (sel) cls += " selected";
+    if (inGarden && !sel) cls += " already-added";
+    return `<button class="${cls}" data-idx="${idx}" data-pid="${p.id}" type="button">
+      ${sel    ? '<span class="sel-check">✓</span>' : ''}
+      ${inGarden && !sel ? '<span class="already-badge">✓</span>' : ''}
       <span class="popular-emoji">${p.emoji}</span>
       <span class="popular-name">${esc(p.nameTr)}</span>
     </button>`;
@@ -376,6 +384,11 @@ function renderCatalog(query, cat) {
 
 // Seç / kaldır
 function togglePlantSelect(dbPlant, btn) {
+  // Zaten bahçede varsa seçme
+  if (btn.classList.contains("already-added")) {
+    toast(`${dbPlant.nameTr} zaten bu bahçede ekli`);
+    return;
+  }
   if (selectedPlants.has(dbPlant.id)) {
     selectedPlants.delete(dbPlant.id);
     btn.classList.remove("selected");

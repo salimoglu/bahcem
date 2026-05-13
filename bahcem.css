@@ -1147,3 +1147,48 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   .modal-top { max-width: 560px; margin: 0 auto; border-radius: 0 0 18px 18px !important; }
   .modal-top-backdrop { justify-content: center; }
 }
+
+/* ── Zaten ekli bitki kartı (katalog) ── */
+.popular-plant-btn.already-added {
+  opacity: 0.55;
+  border-color: var(--accent-light) !important;
+  background: var(--surface) !important;
+  cursor: default;
+}
+.popular-plant-btn.already-added:hover {
+  transform: none !important;
+  border-color: var(--accent-light) !important;
+}
+.already-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+  background: var(--muted);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.55rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Zaten ekli göstergesi bitki kartında ── */
+.plant-card .already-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 0.5rem;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 4px;
+  backdrop-filter: blur(2px);
+  white-space: nowrap;
+  line-height: 1.3;
+  pointer-events: none;
+}
