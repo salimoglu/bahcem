@@ -1322,15 +1322,9 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   max-height: 88vh !important;
   overflow-y: auto !important;
 }
-/* Masaüstünde sadece link, metin gizle */
-@media (min-width: 600px) {
-  .preview-wiki-excerpt { display: none; }
-  .preview-wiki-img     { display: none !important; }
-  .preview-wiki-label   { display: none; }
-  .preview-wiki-area    { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
-}
-/* Mobilde link her zaman görünsün */
-.preview-wiki-link {
-  display: block !important;
-  width: fit-content;
-}
+/* Her ekranda sadece link göster, metin/foto gizle */
+.preview-wiki-excerpt { display: none; }
+.preview-wiki-img     { display: none !important; }
+.preview-wiki-label   { display: none; }
+.preview-wiki-area    { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+.preview-wiki-link    { display: inline-block !important; }
