@@ -470,29 +470,39 @@ function showPlantPreview(dbPlant) {
   });
 }
 
-// Wikipedia özeti çek — TR önce, EN fallback
-// Her sorgu için: önce search ile doğru başlığı bul, sonra summary çek
+// Latince addan cins adını çıkar: "Aglaonema red" → "Aglaonema"
+function genusFrom(nameLat) {
+  if (!nameLat) return "";
+  return nameLat.trim().split(/\s+/)[0];
+}
+
+// Wikipedia özeti çek — TR önce, EN fallback, cins adı fallback
 async function fetchWikiPreview(dbPlant) {
+  const genus = genusFrom(dbPlant.nameLat);
+  // Sorgular: özel addan genele doğru
   const queries = [
     { lang: "tr", q: dbPlant.nameTr },
     { lang: "tr", q: dbPlant.nameLat },
+    { lang: "tr", q: genus },
     { lang: "en", q: dbPlant.nameLat },
+    { lang: "en", q: genus },
     { lang: "en", q: dbPlant.nameTr },
-  ].filter(x => x.q && x.q.trim());
+  ].filter(x => x.q && x.q.trim().length > 1);
+
+  // Aynı (lang,q) ikilisini tekrar deneme
+  const tried = new Set();
 
   for (const { lang, q } of queries) {
+    const key = lang + ":" + q.toLowerCase();
+    if (tried.has(key)) continue;
+    tried.add(key);
     try {
-      // 1. Arama ile en iyi başlığı bul
       const searchRes = await fetch(
-        `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&srlimit=3&origin=*`
+        `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&srlimit=5&origin=*`
       );
       if (!searchRes.ok) continue;
-      const searchData = await searchRes.json();
-      const hits = searchData?.query?.search || [];
-      if (!hits.length) continue;
-
-      // İlk uygun sonucu dene
-      for (const hit of hits) {
+      const hits = (await searchRes.json())?.query?.search || [];
+      for (const hit of hits.slice(0, 3)) {
         try {
           const sumRes = await fetch(
             `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title.replace(/ /g,"_"))}`
@@ -501,7 +511,6 @@ async function fetchWikiPreview(dbPlant) {
           const data = await sumRes.json();
           if (data.type === "disambiguation" || !data.extract || data.extract.length < 30) continue;
           return {
-            excerpt: data.extract.slice(0, 500),
             url: data.content_urls?.desktop?.page ||
                  `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(hit.title.replace(/ /g,"_"))}`
           };
@@ -509,12 +518,10 @@ async function fetchWikiPreview(dbPlant) {
       }
     } catch(e) { continue; }
   }
-  // Hiç bulunamazsa direkt Wikipedia arama linki döndür
-  const fallbackQ = dbPlant.nameLat || dbPlant.nameTr;
-  return {
-    excerpt: "",
-    url: `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(fallbackQ)}`
-  };
+
+  // Son çare: Wikipedia arama sayfası (her zaman çalışır)
+  const fbQ = dbPlant.nameLat || dbPlant.nameTr;
+  return { url: `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(fbQ)}` };
 }
 
 // Seç / kaldır
