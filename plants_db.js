@@ -573,4 +573,70 @@ const PLANTS_DB = [
   { id:"torenia",          nameTr:"Dilek Çiçeği",                nameLat:"Torenia fournieri",             emoji:"💜", light:"Yarı gölge",    waterDays:3,  care:"Gölgeye uygun renkli çiçekler. Sıcak sever. Saksıda güzel." , category:"minyatur" },
   { id:"dichondra",        nameTr:"Dikondra",                    nameLat:"Dichondra argentea",            emoji:"🥈", light:"Tam güneş",     waterDays:5,  care:"Gümüş yuvarlak yapraklar. Sarkık form. Sıcak kuraklık sever." , category:"minyatur" },
   { id:"lysimachia",       nameTr:"Sarmaşık Yılanbaşı",          nameLat:"Lysimachia nummularia",         emoji:"💚", light:"Yarı gölge",    waterDays:4,  care:"Sarı-yeşil yuvarlak yapraklar. Sarkık form. Nemli toprak." , category:"minyatur" },
+,
+
+  // ── Eksik temel türler ──
+
+  // MEYVE AĞAÇLARI
+  { id:"kiraz",          nameTr:"Kiraz",               nameLat:"Prunus avium",              emoji:"🍒", light:"Tam güneş",     waterDays:5,  care:"Vişneden farklı olarak tatlı meyve verir. Tozlaşma için 2 çeşit gerekir. İlkbaharda çiçek açar.", category:"sebze_meyve" },
+  { id:"ayva",           nameTr:"Ayva",                nameLat:"Cydonia oblonga",           emoji:"🍐", light:"Tam güneş",     waterDays:7,  care:"Elma-armut ile akraba. Sert meyve, pişirilerek yenir. Kışa dayanıklı, az bakım.", category:"sebze_meyve" },
+  { id:"dut",            nameTr:"Dut",                 nameLat:"Morus alba",                emoji:"🫐", light:"Tam güneş",     waterDays:7,  care:"Hızlı büyür. Beyaz ve kırmızı çeşitleri var. Kuş çeker. Az bakım.", category:"sebze_meyve" },
+  { id:"kizilcik",       nameTr:"Kızılcık",            nameLat:"Cornus mas",                emoji:"🔴", light:"Yarı gölge",    waterDays:7,  care:"Erken ilkbaharda sarı çiçekler. Ekşi kırmızı meyveler. Marmelat için ideal.", category:"sebze_meyve" },
+  { id:"yenidunya",      nameTr:"Yenidünya",           nameLat:"Eriobotrya japonica",       emoji:"🟡", light:"Tam güneş",     waterDays:7,  care:"Kışın çiçek açar, baharda meyve verir. Türkiye'de yaygın. Az bakım.", category:"sebze_meyve" },
+  { id:"hurma",          nameTr:"Hurma",               nameLat:"Phoenix dactylifera",       emoji:"🌴", light:"Tam güneş",     waterDays:10, care:"Sıcak ve kurak iklim sever. Erkek ve dişi ağaç gerekir. Yavaş büyür.", category:"sebze_meyve" },
+  { id:"badem",          nameTr:"Badem",               nameLat:"Prunus dulcis",             emoji:"🌸", light:"Tam güneş",     waterDays:10, care:"Erken çiçeklenir, don riskine dikkat. Kuru iklime dayanıklı.", category:"sebze_meyve" },
+  { id:"ceviz_kara",     nameTr:"Kara Ceviz",          nameLat:"Juglans nigra",             emoji:"🌰", light:"Tam güneş",     waterDays:7,  care:"Siyah kabuklu meyveler. Normal cevizden büyür. Geniş alan gerekir.", category:"sebze_meyve" },
+  { id:"antep_fistigi",  nameTr:"Antep Fıstığı",       nameLat:"Pistacia vera",             emoji:"🟢", light:"Tam güneş",     waterDays:14, care:"Sıcak ve kuru iklim. Erkek-dişi gerekir. Yavaş büyür ama uzun ömürlü.", category:"sebze_meyve" },
+  { id:"trabzon_hurmasi",nameTr:"Trabzon Hurması",      nameLat:"Diospyros kaki",            emoji:"🟠", light:"Tam güneş",     waterDays:5,  care:"Sonbaharda turuncu meyveler. Yaprak döktükten sonra meyve kalır. Güzel görünüm.", category:"sebze_meyve" },
+  { id:"frambuaz",       nameTr:"Frambuaz",            nameLat:"Rubus idaeus",              emoji:"🩷", light:"Tam güneş",     waterDays:4,  care:"Ahududu ile aynı tür. Pembe renkli çeşit. Destek gerekir.", category:"sebze_meyve" },
+  { id:"bektasi_uzumu",  nameTr:"Bektaşi Üzümü",       nameLat:"Ribes grossularia",         emoji:"🟢", light:"Yarı gölge",    waterDays:5,  care:"Küçük çalı. Ekşi meyveler. Gölgeye dayanır. Kışa çok dayanıklı.", category:"sebze_meyve" },
+  { id:"patates",        nameTr:"Patates",             nameLat:"Solanum tuberosum",         emoji:"🥔", light:"Tam güneş",     waterDays:4,  care:"Yumru bitkisi. Tohumdan değil yumrudan ekilir. Toprak kabarınca hasat.", category:"sebze_meyve" },
+  { id:"patlican_uzun",  nameTr:"Uzun Patlıcan",       nameLat:"Solanum melongena longum",  emoji:"🍆", light:"Tam güneş",     waterDays:3,  care:"İnce uzun form. Balkan mutfağında yaygın. Aynı bakım gereksinimleri.", category:"sebze_meyve" },
+  { id:"sivri_biber2",   nameTr:"Acı Sivri Biber",     nameLat:"Capsicum frutescens",       emoji:"🌶️", light:"Tam güneş",    waterDays:3,  care:"Çok acı. Küçük meyveler. Kurutularak kullanılır. Sıcak sever.", category:"sebze_meyve" },
+  { id:"saricicek",      nameTr:"Sarı Çiçekli Kabak",  nameLat:"Cucurbita maxima",          emoji:"🟡", light:"Tam güneş",     waterDays:3,  care:"Dev balkabağı formu. Uzun büyüme süresi. Bol gübre ve alan gerekir.", category:"sebze_meyve" },
+
+  // İÇ MEKAN EKSİKLER
+  { id:"klorof_var",     nameTr:"Alacalı Örümcek",     nameLat:"Chlorophytum comosum variegatum",emoji:"🕷️",light:"Parlak dolaylı",waterDays:7,care:"Sarı-yeşil alacalı şerit. Normal örümcek bitkisi ile aynı bakım.", category:"ic_mekan" },
+  { id:"zamio_gold",     nameTr:"Altın ZZ",            nameLat:"Zamioculcas zamiifolia Gold",emoji:"💛", light:"Az ışık",       waterDays:14, care:"Sarı-yeşil alacalı ZZ. Nadir çeşit. Normal ZZ'den biraz daha fazla ışık ister.", category:"ic_mekan" },
+  { id:"string_banana",  nameTr:"Muz Dizisi",          nameLat:"Curio radicans",            emoji:"🍌", light:"Tam güneş",     waterDays:14, care:"Muz şekilli yapraklar sarkık dallar üzerinde. İnci kolyesinin akrabası.", category:"ic_mekan" },
+  { id:"monstera_siltep",nameTr:"Siltepecana",         nameLat:"Monstera siltepecana",      emoji:"🌿", light:"Parlak dolaylı", waterDays:7,  care:"Genç halde gümüş lekeli yapraklar. Tırmanınca büyük delikli form alır.", category:"ic_mekan" },
+  { id:"scindapsus",     nameTr:"Satin Pothos",        nameLat:"Scindapsus pictus",         emoji:"🍃", light:"Az ışık",       waterDays:7,  care:"Gümüş lekeli mat yapraklar. Pothos ile akraba ama daha yavaş büyür.", category:"ic_mekan" },
+  { id:"aeschynanthus",  nameTr:"Ruj Bitkisi",         nameLat:"Aeschynanthus radicans",    emoji:"🌺", light:"Parlak dolaylı", waterDays:5,  care:"Sarkık dallar üzerinde kırmızı trompet çiçekler. Yüksek nem sever.", category:"ic_mekan" },
+  { id:"columnea",       nameTr:"Balık Kancası",       nameLat:"Columnea gloriosa",         emoji:"🌺", light:"Parlak dolaylı", waterDays:5,  care:"Kırmızı-sarı çiçekler. Sepette güzel sarkar. Yüksek nem.", category:"ic_mekan" },
+  { id:"medinilla",      nameTr:"Medinilla",           nameLat:"Medinilla magnifica",       emoji:"🌸", light:"Parlak dolaylı", waterDays:5,  care:"Pembe salkım çiçekler. Tropikal. Yüksek nem ve sıcaklık şart.", category:"ic_mekan" },
+  { id:"euphorbia_pul",  nameTr:"Ateş Başı",          nameLat:"Euphorbia pulcherrima",     emoji:"🔴", light:"Parlak dolaylı", waterDays:5,  care:"Noel bitkisi. Kırmızı brakte yapraklar. Serin yerde uzun dayanır.", category:"ic_mekan" },
+  { id:"impatiens_new",  nameTr:"Yeni Gine Gülü",      nameLat:"Impatiens hawkeri",         emoji:"🌸", light:"Parlak dolaylı", waterDays:3,  care:"Büyük renkli çiçekler. Saksıda harika. Düzenli gübre ister.", category:"ic_mekan" },
+
+  // AĞAÇ / ÇALI EKSİKLER  
+  { id:"mesecam",        nameTr:"Meşe",                nameLat:"Quercus robur",             emoji:"🌳", light:"Tam güneş",     waterDays:10, care:"Yüzyıllar yaşar. Yavaş büyür. Zengin toprak fauna barındırır.", category:"agac_cali" },
+  { id:"cam",            nameTr:"Çam",                 nameLat:"Pinus sylvestris",          emoji:"🌲", light:"Tam güneş",     waterDays:14, care:"Kışa çok dayanıklı. Fakir toprakta bile büyür. Kuraklığa dayanır.", category:"agac_cali" },
+  { id:"kestane",        nameTr:"Kestane",             nameLat:"Castanea sativa",           emoji:"🌰", light:"Tam güneş",     waterDays:7,  care:"Hızlı büyür. Yenebilir meyve. Asit toprak sever.", category:"agac_cali" },
+  { id:"ihlamur",        nameTr:"Ihlamur",             nameLat:"Tilia cordata",             emoji:"🌿", light:"Tam güneş",     waterDays:7,  care:"Yaz ortasında ballı çiçekler. Arılar için mükemmel. Yoğun koku.", category:"agac_cali" },
+  { id:"kavak",          nameTr:"Kavak",               nameLat:"Populus nigra",             emoji:"🌳", light:"Tam güneş",     waterDays:5,  care:"Çok hızlı büyür. Rüzgar perdesi için. Nem sever.", category:"agac_cali" },
+  { id:"sogutdalı",      nameTr:"Söğüt",               nameLat:"Salix babylonica",          emoji:"🌿", light:"Tam güneş",     waterDays:3,  care:"Sarkan dallar. Su kenarında mükemmel. Kök su borularına zarar verebilir.", category:"agac_cali" },
+  { id:"kizilağac",      nameTr:"Kızılağaç",           nameLat:"Alnus glutinosa",           emoji:"🌳", light:"Tam güneş",     waterDays:3,  care:"Su kenarı ağacı. Toprağa azot katar. Hızlı büyür.", category:"agac_cali" },
+  { id:"iğde2",          nameTr:"İğde Ağacı",          nameLat:"Elaeagnus angustifolia",    emoji:"🌿", light:"Tam güneş",     waterDays:10, care:"Gümüş yapraklar, kokulu sarı çiçekler. Kuraklığa dayanıklı.", category:"agac_cali" },
+  { id:"gürgen",         nameTr:"Gürgen",              nameLat:"Carpinus betulus",          emoji:"🌳", light:"Yarı gölge",    waterDays:7,  care:"Yavaş büyür. Çit ve budama için ideal. Sonbaharda güzel renk.", category:"agac_cali" },
+  { id:"dişoganak",      nameTr:"Dişoganak",           nameLat:"Viburnum lantana",          emoji:"🌿", light:"Yarı gölge",    waterDays:7,  care:"Beyaz çiçekler, kırmızı-siyah meyveler. Kışa dayanıklı çalı.", category:"agac_cali" },
+  { id:"karayemis",      nameTr:"Karayemiş",           nameLat:"Prunus laurocerasus",       emoji:"🌿", light:"Yarı gölge",    waterDays:7,  care:"Her mevsim yeşil, parlak yapraklar. Çit bitkisi. Beyaz çiçekler.", category:"agac_cali" },
+  { id:"laden",          nameTr:"Laden",               nameLat:"Cistus salviifolius",       emoji:"🌸", light:"Tam güneş",     waterDays:14, care:"Akdeniz çalısı. Kağıt gibi beyaz çiçekler. Kuraklığa çok dayanıklı.", category:"agac_cali" },
+  { id:"zakkum",         nameTr:"Zakkum",              nameLat:"Nerium oleander",           emoji:"🌸", light:"Tam güneş",     waterDays:7,  care:"Pembe-kırmızı çiçekler. Tüm parçaları ZEHİRLİ. Kuraklığa dayanıklı.", category:"agac_cali" },
+
+  // BAHÇE ÇİÇEKLERİ EKSİKLER
+  { id:"begonvil3",      nameTr:"Turuncu Bugenvil",    nameLat:"Bougainvillea Orange",      emoji:"🟠", light:"Tam güneş",     waterDays:5,  care:"Turuncu brakte yapraklar. Diğer bugenvil çeşitleriyle aynı bakım.", category:"bahce_cicek" },
+  { id:"leylak_b",       nameTr:"Bodur Leylak",        nameLat:"Syringa meyeri Palibin",    emoji:"💜", light:"Tam güneş",     waterDays:7,  care:"Küçük bahçelere uygun cüce form. Tüm leylak güzelliği küçük alanda.", category:"bahce_cicek" },
+  { id:"cicekli_badem",  nameTr:"Çiçekli Badem",       nameLat:"Prunus triloba",            emoji:"🌸", light:"Tam güneş",     waterDays:5,  care:"İlkbaharda bol pembe çiçek. Meyve vermez. Saksıda da yetişir.", category:"bahce_cicek" },
+  { id:"oya_cicek",      nameTr:"Oya Çiçeği",          nameLat:"Iberis sempervirens",       emoji:"🤍", light:"Tam güneş",     waterDays:5,  care:"İlkbaharda beyaz çiçek halısı. Her mevsim yeşil. Kaya bahçesi için.", category:"bahce_cicek" },
+  { id:"akkavak",        nameTr:"Kâtir Çiçeği",        nameLat:"Achillea ptarmica",         emoji:"🤍", light:"Tam güneş",     waterDays:5,  care:"Beyaz top çiçekler. Kesme çiçek için. Kuraklığa dayanır.", category:"bahce_cicek" },
+  { id:"cicekkabagi",    nameTr:"Çiçek Kabağı",        nameLat:"Cucurbita pepo ornamental", emoji:"🎃", light:"Tam güneş",     waterDays:3,  care:"Dekoratif küçük kabaklar. Sonbaharda rengarenk görünüm. Tırmanıcı.", category:"bahce_cicek" },
+  { id:"kocayemis",      nameTr:"Kocayemiş",           nameLat:"Arbutus unedo",             emoji:"🔴", light:"Tam güneş",     waterDays:10, care:"Çilek gibi kırmızı meyveler. Akdeniz bitkisi. Aynı anda çiçek ve meyve.", category:"bahce_cicek" },
+
+  // TIBBİ EKSİKLER
+  { id:"safran",         nameTr:"Safran",              nameLat:"Crocus sativus",            emoji:"💜", light:"Tam güneş",     waterDays:7,  care:"Dünyanın en pahalı baharatı. Sonbaharda mor çiçekler. Soğan bitkisi.", category:"tibbi" },
+  { id:"zerdeçal2",      nameTr:"Hint Safranı",        nameLat:"Curcuma longa",             emoji:"🟡", light:"Yarı gölge",    waterDays:4,  care:"Zerdeçal ile aynı bitki. Sarı pigment. İçerde saksıda yetişir.", category:"tibbi" },
+  { id:"corekotu",       nameTr:"Çörek Otu",           nameLat:"Nigella sativa",            emoji:"🌿", light:"Tam güneş",     waterDays:5,  care:"Siyah tohumlar şifalı ve baharat. Mavi çiçekler de güzel görünür.", category:"tibbi" },
+  { id:"isırgan",        nameTr:"Isırgan Otu",         nameLat:"Urtica dioica",             emoji:"🌿", light:"Yarı gölge",    waterDays:4,  care:"Elleri yakan tüyler. Demir zengini, şifalı. Eldiven ile hasat edin.", category:"tibbi" },
+  { id:"ebegumeci",      nameTr:"Ebegümeci",           nameLat:"Malva sylvestris",          emoji:"🌸", light:"Tam güneş",     waterDays:5,  care:"Mor çizgili pembe çiçekler. Şifalı. Kendi kendine tohumlanır.", category:"tibbi" },
+  { id:"hardal",         nameTr:"Hardal",              nameLat:"Sinapis alba",              emoji:"🌿", light:"Tam güneş",     waterDays:4,  care:"Sarı çiçekler. Tohumlar baharat olarak kullanılır. Hızlı büyür.", category:"tibbi" },
+  { id:"papatya_camomil",nameTr:"Roma Papatyası",      nameLat:"Anthemis nobilis",          emoji:"🌼", light:"Tam güneş",     waterDays:4,  care:"Alman papatyasına benzer ama çok yıllık. Çay için kullanılır.", category:"tibbi" },
 ];
