@@ -471,30 +471,50 @@ function showPlantPreview(dbPlant) {
 }
 
 // Wikipedia özeti çek — TR önce, EN fallback
+// Her sorgu için: önce search ile doğru başlığı bul, sonra summary çek
 async function fetchWikiPreview(dbPlant) {
   const queries = [
     { lang: "tr", q: dbPlant.nameTr },
     { lang: "tr", q: dbPlant.nameLat },
     { lang: "en", q: dbPlant.nameLat },
     { lang: "en", q: dbPlant.nameTr },
-  ].filter(x => x.q);
+  ].filter(x => x.q && x.q.trim());
 
   for (const { lang, q } of queries) {
     try {
-      const sumUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q.replace(/ /g,"_"))}`;
-      const res = await fetch(sumUrl);
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data.type === "disambiguation" || data.type === "not_found" || !data.extract) continue;
-      if (data.extract.length < 50) continue; // çok kısa özet
-      return {
-        excerpt: data.extract.slice(0, 600) + (data.extract.length > 600 ? "…" : ""),
-        imageUrl: (data.originalimage?.source) || (data.thumbnail?.source) || "",
-        url: data.content_urls?.desktop?.page || `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(q.replace(/ /g,"_"))}`
-      };
+      // 1. Arama ile en iyi başlığı bul
+      const searchRes = await fetch(
+        `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&srlimit=3&origin=*`
+      );
+      if (!searchRes.ok) continue;
+      const searchData = await searchRes.json();
+      const hits = searchData?.query?.search || [];
+      if (!hits.length) continue;
+
+      // İlk uygun sonucu dene
+      for (const hit of hits) {
+        try {
+          const sumRes = await fetch(
+            `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title.replace(/ /g,"_"))}`
+          );
+          if (!sumRes.ok) continue;
+          const data = await sumRes.json();
+          if (data.type === "disambiguation" || !data.extract || data.extract.length < 30) continue;
+          return {
+            excerpt: data.extract.slice(0, 500),
+            url: data.content_urls?.desktop?.page ||
+                 `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(hit.title.replace(/ /g,"_"))}`
+          };
+        } catch(e) { continue; }
+      }
     } catch(e) { continue; }
   }
-  return null;
+  // Hiç bulunamazsa direkt Wikipedia arama linki döndür
+  const fallbackQ = dbPlant.nameLat || dbPlant.nameTr;
+  return {
+    excerpt: "",
+    url: `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(fallbackQ)}`
+  };
 }
 
 // Seç / kaldır
