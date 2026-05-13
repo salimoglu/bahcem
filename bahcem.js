@@ -519,7 +519,7 @@ function wireOnce() {
     selectedPlants.clear();
     updateSelectionBar();
     renderCatalog(); // seçim işaretlerini kaldır
-  });}
+  });
 
   // Kaydet
   document.getElementById("btn-save-plant").addEventListener("click", savePlant);
