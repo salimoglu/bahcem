@@ -320,11 +320,55 @@ function listenPlants(gid) {
   });
 }
 
+
+// ─── SULAMA UYARI BANNER'I ───
+function updateWateringBanner() {
+  let banner = document.getElementById("watering-banner");
+
+  // Tüm bahçelerdeki sulanması gereken bitkileri bul
+  const overdue = plants.filter(p => {
+    const st = waterStatus(p);
+    return st.key === "late" || st.key === "today";
+  });
+
+  if (overdue.length === 0) {
+    if (banner) banner.remove();
+    return;
+  }
+
+  // Banner yoksa oluştur
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "watering-banner";
+    banner.className = "watering-banner";
+    // plant-list'in üstüne ekle
+    const plantList = document.getElementById("plant-list");
+    if (plantList && plantList.parentNode) {
+      plantList.parentNode.insertBefore(banner, plantList);
+    }
+  }
+
+  const count = overdue.length;
+  const names = overdue.slice(0, 2).map(p => esc(p.nameTr || "Bitki")).join(", ");
+  const more  = count > 2 ? ` +${count - 2} daha` : "";
+
+  banner.innerHTML = `
+    <div class="wb-icon">💧</div>
+    <div class="wb-text">
+      <strong>${count} bitki sulama bekliyor</strong>
+      <span>${names}${more}</span>
+    </div>
+    <button class="wb-close" onclick="this.closest('.watering-banner').remove()" aria-label="Kapat">✕</button>
+  `;
+}
+
 function renderPlants() {
   const list  = document.getElementById("plant-list");
   const empty = document.getElementById("plants-empty");
   if (!plants.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden");
+  // Render bittikten sonra sulama banner'ını güncelle
+  setTimeout(updateWateringBanner, 0);
 
   list.innerHTML = plants.map(p => {
     const st = waterStatus(p);
