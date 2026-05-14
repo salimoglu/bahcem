@@ -123,7 +123,7 @@ async function submitFeedback(ev) {
     label.toUpperCase() + "\n\n" + msg +
     "\n\n---\nGönderen: " + name + (email ? " (" + email + ")" : "")
   );
-  window.open("mailto:salimoglu61@gmail.com?subject=" + subj + "&body=" + body, "_blank");
+  window.location.href = "mailto:salimoglu61@gmail.com?subject=" + subj + "&body=" + body;
   // Textarea temizle + sonuç mesajı göster
   const msgEl2 = document.getElementById("field-feedback-msg");
   if (msgEl2) msgEl2.value = "";
