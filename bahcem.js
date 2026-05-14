@@ -112,70 +112,26 @@ function closeFeedbackModal() {
 }
 
 async function submitFeedback(ev) {
-  ev.preventDefault();
-  const formId = String(FORMSPREE_FORM_ID || "").trim();
-  if (!formId || formId === "YOUR_FORMSPREE_FORM_ID") {
-    // Formspree ID yok → mailto fallback
-    const subj2 = encodeURIComponent("[Bahçem] " + type);
-    const body2 = encodeURIComponent(
-      type + "\n\n" + msg +
-      "\n\n---\nGönderen: " + name + " (" + email + ")"
-    );
-    window.open("mailto:salimoglu61@gmail.com?subject=" + subj2 + "&body=" + body2, "_blank");
-    if (typeof closeFeedbackModal === "function") closeFeedbackModal();
-    toast("Mail uygulamanız açıldı.");
-    return;
-  }
-  const msg = document.getElementById("field-feedback-msg").value.trim();
-  if (!msg) {
-    toast("Lütfen mesaj yazın.");
-    return;
-  }
-  const typeRadio = document.querySelector('#form-feedback input[name="feedback-type"]:checked');
-  const type = typeRadio ? typeRadio.value : "oneri";
-  const subj = type === "sikayet" ? "Bahçem — Şikayet" : "Bahçem — Öneri";
-  const btn = document.getElementById("btn-feedback-send");
-  const prev = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = "Gönderiliyor…";
-  try {
-    const email = currentUser && currentUser.email ? currentUser.email : "";
-    if (!email) {
-      toast("E-posta bulunamadı; geri bildirim için oturum gerekli.");
-      return;
-    }
-    const name = currentUser && currentUser.displayName ? currentUser.displayName : "Bahçem kullanıcısı";
-    const uid = currentUser && currentUser.uid ? currentUser.uid : "";
-    const payload = {
-      name,
-      email,
-      _replyto: email,
-      message: msg + "\n\n---\nGönderen: " + email + "\nUID: " + (uid || "—"),
-      _subject: subj,
-      tip: type === "sikayet" ? "şikayet" : "öneri",
-    };
-    const res = await fetch(`https://formspree.io/f/${encodeURIComponent(formId)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) {
-      closeFeedbackModal();
-      toast("Mesajınız alındı, teşekkürler!");
-    } else {
-      const err =
-        (typeof data.error === "string" && data.error) ||
-        (data.errors && Object.values(data.errors).flat().filter(Boolean).join(" ")) ||
-        "Gönderilemedi. Daha sonra deneyin.";
-      toast(err);
-    }
-  } catch (e) {
-    toast("Bağlantı hatası: " + (e.message || "bilinmiyor"));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = prev;
-  }
+  if (ev) ev.preventDefault();
+
+  const msgEl = document.getElementById("field-feedback-msg");
+  const msg   = msgEl ? msgEl.value.trim() : "";
+  if (!msg) { toast("Lütfen bir mesaj yazın"); return; }
+
+  const typeRadioEl = document.querySelector('#form-feedback input[name="feedback-type"]:checked');
+  const type  = typeRadioEl ? typeRadioEl.value : "oneri";
+  const label = { oneri:"Öneri", sikayet:"Şikayet", hata:"Hata Bildirimi" }[type] || type;
+  const name  = currentUser ? (currentUser.displayName || "Kullanıcı") : "Anonim";
+  const email = currentUser ? (currentUser.email || "") : "";
+
+  const subj = encodeURIComponent("[Bahçem] " + label);
+  const body = encodeURIComponent(
+    label.toUpperCase() + "\n\n" + msg +
+    "\n\n---\nGönderen: " + name + (email ? " (" + email + ")" : "")
+  );
+  window.open("mailto:salimoglu61@gmail.com?subject=" + subj + "&body=" + body, "_blank");
+  closeFeedbackModal();
+  toast("Mail uygulamanız açıldı 📧");
 }
 
 function waterStatus(p) {
