@@ -407,31 +407,53 @@ function openPlantDetail(pid) {
   const link = p.wikiUrl ? `<a href="${escA(p.wikiUrl)}" target="_blank" rel="noopener" style="font-size:.85rem">Vikipedi'de aç ↗</a>` : "";
 
   document.getElementById("plant-detail-content").innerHTML = `
-    ${img}
-    <h3 style="margin:0 0 2px;font-size:1.15rem">${esc(p.nameTr||"Bitki")}</h3>
-    ${p.nameLat ? `<div style="font-size:.8rem;color:var(--muted);font-style:italic;margin-bottom:8px">${esc(p.nameLat)}</div>` : ""}
-    ${p.light   ? `<span class="info-badge info-light" style="margin-bottom:10px;display:inline-block">${esc(p.light)}</span>` : ""}
-    <br>
-    <span class="badge ${cls}" style="margin-bottom:10px;display:inline-flex">💧 ${esc(st.label)}</span>
-    <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">
-      Son sulama: <strong>${fmtDate(p.lastWateredAt)}</strong>
-    </p>
-    ${p.care ? `<div class="preview-box" style="margin-bottom:10px;max-height:none">${esc(p.care)}</div>` : ""}
-    ${p.excerpt && p.excerpt !== p.care ? `<div class="preview-box" style="margin-bottom:10px;max-height:120px">${esc(p.excerpt)}</div>` : ""}
-    ${link}
-    <div class="field" style="margin-top:14px">
-      <label for="detail-interval">Sulama aralığı (gün)</label>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
-        <button type="button" class="ppc-step" id="det-step-down">−</button>
-        <span id="det-interval-val" style="font-size:1.1rem;font-weight:800;min-width:28px;text-align:center;color:var(--accent-dark)">${p.wateringIntervalDays||7}</span>
-        <span style="font-size:.8rem;color:var(--muted)">gün</span>
-        <button type="button" class="ppc-step" id="det-step-up">+</button>
+    <div class="det-scroll">
+      ${img}
+      <div class="det-header">
+        <div>
+          <h3 class="det-name">${esc(p.nameTr||"Bitki")}</h3>
+          ${p.nameLat ? `<div class="det-latin">${esc(p.nameLat)}</div>` : ""}
+        </div>
+        <span class="badge ${cls}">💧 ${esc(st.label)}</span>
       </div>
+      <div class="det-meta-row">
+        ${p.light ? `<span class="info-badge info-light">${esc(p.light)}</span>` : ""}
+        <span class="det-last-water">Son sulama: <strong>${fmtDate(p.lastWateredAt)}</strong></span>
+      </div>
+      ${p.care ? `<div class="preview-box det-care">${esc(p.care)}</div>` : ""}
+      ${link ? `<div style="margin-bottom:10px">${link}</div>` : ""}
+      <div class="det-interval-row">
+        <label class="det-interval-label">Sulama aralığı</label>
+        <div class="ppc-watering-ctrl">
+          <button type="button" class="ppc-step" id="det-step-down">−</button>
+          <span id="det-interval-val" class="det-interval-num">${p.wateringIntervalDays||7}</span>
+          <span class="ppc-day-label">gün</span>
+          <button type="button" class="ppc-step" id="det-step-up">+</button>
+        </div>
+      </div>
+      ${(p.wateringHistory&&p.wateringHistory.length) ? `
+      <div class="water-history">
+        <div class="water-history-title">💧 Sulama Geçmişi</div>
+        <div class="water-history-list">
+          ${[...p.wateringHistory].reverse().slice(0,10).map((iso,i) => {
+            const d = new Date(iso);
+            const dateStr = d.toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"});
+            const timeStr = d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+            return `<div class="water-history-row ${i===0?"wh-latest":""}">
+              <span class="wh-dot"></span>
+              <span class="wh-date">${dateStr}</span>
+              <span class="wh-time">${timeStr}</span>
+            </div>`;
+          }).join("")}
+          ${p.wateringHistory.length > 10 ? `<div class="wh-more">+ ${p.wateringHistory.length-10} daha…</div>` : ""}
+        </div>
+      </div>` : ""}
     </div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-primary"   id="btn-det-water">💧 Suladım</button>
-      <button type="button" class="btn btn-secondary" id="btn-det-save">Aralığı kaydet</button>
-      <button type="button" class="btn btn-danger"    id="btn-det-del">Sil</button>
+    <div class="det-action-bar">
+      <button type="button" class="det-btn det-btn-water"  id="btn-det-water">💧<span>Suladım</span></button>
+      <button type="button" class="det-btn det-btn-save"   id="btn-det-save">✓<span>Kaydet</span></button>
+      <button type="button" class="det-btn det-btn-del"    id="btn-det-del">🗑<span>Sil</span></button>
+      <button type="button" class="det-btn det-btn-close"  id="btn-det-close">✕<span>Kapat</span></button>
     </div>
     ${(p.wateringHistory&&p.wateringHistory.length) ? `
     <div class="water-history">
@@ -461,6 +483,8 @@ function openPlantDetail(pid) {
     detInterval = Math.min(90, detInterval + 1);
     document.getElementById("det-interval-val").textContent = detInterval;
   };
+  document.getElementById("btn-det-close").onclick = () =>
+    document.getElementById("modal-plant-detail").classList.remove("show");
   document.getElementById("btn-det-water").onclick = async () => {
     const now = new Date().toISOString();
     const history = [...(p.wateringHistory||[]), now];
