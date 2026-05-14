@@ -33,7 +33,7 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 
 // Formspree: https://formspree.io — yeni form oluşturup “form endpoint” ID’sini buraya yazın (örn. xvgw…).
-const FORMSPREE_FORM_ID = "YOUR_FORMSPREE_FORM_ID";
+const FORMSPREE_FORM_ID = ""; // Formspree ID buraya gelecek
 
 const PREF_WATER_OVERRIDE = "bahcem-pref-water-override";
 const PREF_WATER_DAYS = "bahcem-pref-water-days";
@@ -115,7 +115,15 @@ async function submitFeedback(ev) {
   ev.preventDefault();
   const formId = String(FORMSPREE_FORM_ID || "").trim();
   if (!formId || formId === "YOUR_FORMSPREE_FORM_ID") {
-    toast("Formspree form ID eklenmemiş. bahcem.js içinde FORMSPREE_FORM_ID ayarlayın.");
+    // Formspree ID yok → mailto fallback
+    const subj2 = encodeURIComponent("[Bahçem] " + type);
+    const body2 = encodeURIComponent(
+      type + "\n\n" + msg +
+      "\n\n---\nGönderen: " + name + " (" + email + ")"
+    );
+    window.open("mailto:salimoglu61@gmail.com?subject=" + subj2 + "&body=" + body2, "_blank");
+    if (typeof closeFeedbackModal === "function") closeFeedbackModal();
+    toast("Mail uygulamanız açıldı.");
     return;
   }
   const msg = document.getElementById("field-feedback-msg").value.trim();
