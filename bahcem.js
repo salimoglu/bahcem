@@ -112,7 +112,7 @@ async function submitFeedback(ev) {
   const msg   = msgEl ? msgEl.value.trim() : "";
   if (!msg) { toast("Lütfen bir mesaj yazın"); return; }
 
-  const typeRadioEl = document.querySelector('#form-feedback input[name="feedback-type"]:checked');
+  const typeRadioEl = document.querySelector('input[name="feedback-type"]:checked');
   const type  = typeRadioEl ? typeRadioEl.value : "oneri";
   const label = { oneri:"Öneri", sikayet:"Şikayet", hata:"Hata Bildirimi" }[type] || type;
   const name  = currentUser ? (currentUser.displayName || "Kullanıcı") : "Anonim";
