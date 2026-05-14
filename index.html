@@ -45,25 +45,18 @@
 
     <!-- ── ÜST ÇUBUK ── -->
     <div class="top-bar">
-      <div class="theme-btns">
-        <button class="theme-btn active" data-t="light" title="Açık"  aria-label="Açık tema"></button>
-        <button class="theme-btn"        data-t="dark"  title="Koyu"  aria-label="Koyu tema"></button>
-        <button class="theme-btn"        data-t="blue"  title="Mavi"  aria-label="Mavi tema"></button>
-      </div>
+      <div class="top-bar-left"></div>
       <a href="." class="top-bar-brand" title="Sayfayı yenile">
         <img src="icons/logo-header.png" alt="Bahçem"/>
         <span>Bahçem</span>
       </a>
-      <div class="user-info">
+      <div class="top-bar-right">
         <button type="button" id="btn-settings" class="btn-icon btn-settings" title="Ayarlar" aria-label="Ayarlar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
           </svg>
         </button>
-        <img id="user-photo" src="" alt=""/>
-        <span id="user-name"></span>
-        <button type="button" id="btn-logout">Çıkış</button>
       </div>
     </div>
 
@@ -199,6 +192,17 @@
   <!-- ── MODAL: AYARLAR ── -->
   <div id="modal-settings" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal modal-settings">
+      <!-- Hesap bilgisi -->
+      <div class="settings-block settings-account-block">
+        <div class="settings-account-row">
+          <img id="settings-avatar" src="" alt="" class="settings-avatar" style="display:none"/>
+          <div class="settings-account-info">
+            <span id="settings-user-name" class="settings-account-name"></span>
+            <span id="settings-user-email" class="settings-account-email"></span>
+          </div>
+          <button type="button" id="btn-logout" class="btn btn-ghost btn-sm">Çıkış</button>
+        </div>
+      </div>
       <h2>Ayarlar</h2>
       <div class="settings-block">
         <h3 class="settings-heading">Görünüm</h3>

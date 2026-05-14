@@ -186,9 +186,16 @@ document.getElementById("btn-logout").addEventListener("click", async () => {
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
-    const ph = document.getElementById("user-photo");
-    document.getElementById("user-name").textContent = user.displayName || user.email;
-    if (user.photoURL) { ph.src = user.photoURL; ph.style.display = "block"; } else ph.style.display = "none";
+    // Kullanıcı bilgisi artık ayarlar modalında gösterilir
+    const ph = document.getElementById("settings-avatar");
+    if (ph) {
+      if (user.photoURL) { ph.src = user.photoURL; ph.style.display = "block"; }
+      else ph.style.display = "none";
+    }
+    const nameEl = document.getElementById("settings-user-name");
+    if (nameEl) nameEl.textContent = user.displayName || "";
+    const emailEl = document.getElementById("settings-user-email");
+    if (emailEl) emailEl.textContent = user.email || "";
     showApp("app-screen"); showScreen("screen-gardens");
     listenGardens(); applyCompactFromStorage(); wireOnce(); registerSw();
   } else {
