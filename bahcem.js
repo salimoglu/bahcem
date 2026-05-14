@@ -101,14 +101,8 @@ function saveSettingsFromModal() {
   closeSettingsModal();
   toast("Ayarlar kaydedildi ✓");
 }
-function openFeedbackModal() {
-  document.getElementById("field-feedback-msg").value = "";
-  const r = document.querySelector('#form-feedback input[name="feedback-type"][value="oneri"]');
-  if (r) r.checked = true;
-  document.getElementById("modal-feedback").classList.add("show");
-}
 function closeFeedbackModal() {
-  document.getElementById("modal-feedback").classList.remove("show");
+  // artık bağımsız modal yok — ayarlar içinde
 }
 
 async function submitFeedback(ev) {
@@ -130,7 +124,14 @@ async function submitFeedback(ev) {
     "\n\n---\nGönderen: " + name + (email ? " (" + email + ")" : "")
   );
   window.open("mailto:salimoglu61@gmail.com?subject=" + subj + "&body=" + body, "_blank");
-  closeFeedbackModal();
+  // Textarea temizle + sonuç mesajı göster
+  const msgEl2 = document.getElementById("field-feedback-msg");
+  if (msgEl2) msgEl2.value = "";
+  const resEl = document.getElementById("feedback-result");
+  if (resEl) {
+    resEl.textContent = "✓ Mail uygulamanız açıldı. Gönderin!";
+    setTimeout(() => { if (resEl) resEl.textContent = ""; }, 4000);
+  }
   toast("Mail uygulamanız açıldı 📧");
 }
 
@@ -783,10 +784,8 @@ function wireOnce() {
   document.getElementById("modal-settings").addEventListener("click", e => { if (e.target.id === "modal-settings") closeSettingsModal(); });
   document.getElementById("pref-water-override").addEventListener("change", syncWaterDaysInputState);
 
-  document.getElementById("btn-feedback").addEventListener("click", openFeedbackModal);
-  document.getElementById("modal-feedback-close").addEventListener("click", closeFeedbackModal);
-  document.getElementById("modal-feedback").addEventListener("click", e => { if (e.target.id === "modal-feedback") closeFeedbackModal(); });
-  document.getElementById("form-feedback").addEventListener("submit", submitFeedback);
+  // Ayarlar içindeki feedback gönder butonu
+  document.getElementById("btn-feedback-send").addEventListener("click", submitFeedback);
 }
 
 async function registerSw() {

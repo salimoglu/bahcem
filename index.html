@@ -110,10 +110,7 @@
       </div>
     </div>
 
-    <footer class="app-footer">
-      <p class="app-footer-note">Görüşleriniz uygulamayı geliştirir.</p>
-      <button type="button" id="btn-feedback" class="btn btn-ghost btn-feedback-footer">Öneri veya şikayet gönder</button>
-    </footer>
+
 
   </div><!-- /app-screen -->
 
@@ -228,25 +225,30 @@
         <h3 class="settings-heading">Hakkında</h3>
         <p class="settings-about">Bahçem — bitki ve sulama takibi. Kaynak kodu: <a href="https://github.com/salimoglu/bahcem" target="_blank" rel="noopener">GitHub</a></p>
       </div>
+      <div class="settings-block">
+        <h3 class="settings-heading">Öneri &amp; Şikayet</h3>
+        <div class="field">
+          <div class="feedback-type-row" role="group">
+            <label class="feedback-radio"><input type="radio" name="feedback-type" value="oneri" checked/> 💡 Öneri</label>
+            <label class="feedback-radio"><input type="radio" name="feedback-type" value="sikayet"/> ⚠️ Şikayet</label>
+            <label class="feedback-radio"><input type="radio" name="feedback-type" value="hata"/> 🐛 Hata</label>
+          </div>
+        </div>
+        <div class="field">
+          <textarea id="field-feedback-msg" class="feedback-textarea" rows="4"
+            maxlength="4000" placeholder="Ne ekleyelim, ne düzeltelim?"></textarea>
+        </div>
+        <button type="button" class="btn btn-primary btn-block" id="btn-feedback-send">
+          Gönder 📧
+        </button>
+        <p id="feedback-result" class="feedback-result"></p>
+      </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="modal-settings-close">Kapat</button>
         <button type="button" class="btn btn-primary" id="btn-settings-save">Kaydet</button>
       </div>
     </div>
   </div>
-
-  <!-- ── MODAL: GERİ BİLDİRİM (Formspree) ── -->
-  <div id="modal-feedback" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal modal-feedback">
-      <h2>Öneri veya şikayet</h2>
-      <form id="form-feedback">
-        <div class="field">
-          <span class="settings-hint" id="label-feedback-type">Tür</span>
-          <div class="feedback-type-row" role="group" aria-labelledby="label-feedback-type">
-            <label class="feedback-radio"><input type="radio" name="feedback-type" value="oneri" checked/> Öneri</label>
-            <label class="feedback-radio"><input type="radio" name="feedback-type" value="sikayet"/> Şikayet</label>
-          </div>
-        </div>
         <div class="field">
           <label for="field-feedback-msg">Mesajınız</label>
           <textarea id="field-feedback-msg" class="feedback-textarea" rows="5" required maxlength="4000" placeholder="Ne ekleyelim, ne düzeltelim?"></textarea>
