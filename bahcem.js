@@ -871,9 +871,7 @@ function wireOnce() {
   });
 
   // Detay kapat
-  document.getElementById("modal-detail-close").addEventListener("click", () =>
-    document.getElementById("modal-plant-detail").classList.remove("show")
-  );
+
   document.getElementById("modal-plant-detail").addEventListener("click", e => {
     if(e.target.id==="modal-plant-detail") document.getElementById("modal-plant-detail").classList.remove("show");
   });
