@@ -1584,3 +1584,25 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* ── Bildirim durumu ── */
+.settings-notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+.settings-notif-status {
+  font-size: 0.82rem;
+  color: var(--text);
+  font-weight: 600;
+  flex: 1;
+}
+.settings-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
