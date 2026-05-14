@@ -1156,9 +1156,9 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 
 /* ── Yeşil / Mavi sulama çerçevesi ── */
 .card-ok   { border-color: #66bb6a !important; }
-.card-warn { border-color: #42a5f5 !important; }
+.card-warn { border-color: #e53935 !important; }
 [data-theme="dark"] .card-ok   { border-color: #388e3c !important; }
-[data-theme="dark"] .card-warn { border-color: #1565c0 !important; }
+[data-theme="dark"] .card-warn { border-color: #c62828 !important; }
 
 /* ── Bahçe kartı istatistik satırı ── */
 .garden-card-stats {
