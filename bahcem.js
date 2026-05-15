@@ -537,6 +537,7 @@ function renderCatalog(query, cat) {
     results = results.filter(p =>
       (p.nameTr||"").toLocaleLowerCase("tr").includes(q) ||
       (p.nameLat||"").toLowerCase().includes(qLat) ||
+      (p.aliases||"").toLocaleLowerCase("tr").includes(q) ||
       (p.care||"").toLocaleLowerCase("tr").includes(q) ||
       (p.family||"").toLowerCase().includes(qLat)
     );
