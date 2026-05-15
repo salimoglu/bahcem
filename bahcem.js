@@ -1,18 +1,4 @@
 // ===== TEMA =====
-// PLANTS_DB'yi bir kez sırala: Türkçe → Latince → İngilizce
-(function() {
-  const score = p => {
-    if (p.hasTr !== false) return 0;
-    if ((p.nameTr||"") === (p.nameLat||"")) return 1;
-    return 2;
-  };
-  PLANTS_DB.sort((a,b) => {
-    const d = score(a) - score(b);
-    if (d !== 0) return d;
-    return (a.nameTr||"").localeCompare(b.nameTr||"", "tr");
-  });
-})();
-
 (function () {
   const KEY = "bahcem-theme", themes = ["light","dark","blue"];
   function apply(t) {
@@ -836,6 +822,20 @@ async function savePlant() {
 function wireOnce() {
   if (appWired) return;
   appWired = true;
+
+  // PLANTS_DB'yi bir kez sırala: Türkçe → Latince → İngilizce
+  (function() {
+    const score = p => {
+      if (p.hasTr !== false) return 0;
+      if ((p.nameTr||"") === (p.nameLat||"")) return 1;
+      return 2;
+    };
+    PLANTS_DB.sort((a,b) => {
+      const d = score(a) - score(b);
+      if (d !== 0) return d;
+      return (a.nameTr||"").localeCompare(b.nameTr||"", "tr");
+    });
+  })();
 
   // Geri
   document.getElementById("btn-back").addEventListener("click", () => {
