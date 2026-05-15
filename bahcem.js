@@ -1,4 +1,18 @@
 // ===== TEMA =====
+// PLANTS_DB'yi bir kez sırala: Türkçe → Latince → İngilizce
+(function() {
+  const score = p => {
+    if (p.hasTr !== false) return 0;
+    if ((p.nameTr||"") === (p.nameLat||"")) return 1;
+    return 2;
+  };
+  PLANTS_DB.sort((a,b) => {
+    const d = score(a) - score(b);
+    if (d !== 0) return d;
+    return (a.nameTr||"").localeCompare(b.nameTr||"", "tr");
+  });
+})();
+
 (function () {
   const KEY = "bahcem-theme", themes = ["light","dark","blue"];
   function apply(t) {
@@ -539,17 +553,7 @@ function renderCatalog(query, cat) {
       (p.family||"").toLocaleLowerCase("tr").includes(q)
     );
   }
-  // Sıralama: Türkçe isimli önce, sonra latince (nameTr=nameLat), sonra İngilizce
-  results = [...results].sort((a, b) => {
-    const score = p => {
-      if (p.hasTr !== false) return 0;          // Türkçe isim var
-      if ((p.nameTr||"") === (p.nameLat||"")) return 1; // nameTr=latince
-      return 2;                                  // İngilizce isim
-    };
-    const diff = score(a) - score(b);
-    if (diff !== 0) return diff;
-    return (a.nameTr||"").localeCompare(b.nameTr||"", "tr");
-  });
+
 
   const grid = document.getElementById("plant-search-results");
   if (!results.length) {
@@ -574,6 +578,9 @@ function renderCatalog(query, cat) {
       <span class="popular-name">${esc(p.nameTr)}${noTr ? '<span class="no-tr-badge">EN</span>' : ''}</span>
     </button>`;
   }).join("");
+  if (moreCount > 0) {
+    grid.innerHTML += `<p class="catalog-more-hint">+ ${moreCount} bitki daha — aramak için yazmaya başlayın</p>`;
+  }
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
     const dbPlant = PLANTS_DB[Number(btn.dataset.idx)];
     // Kısa tık → seç/kaldır
