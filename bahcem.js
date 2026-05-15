@@ -535,7 +535,8 @@ function renderCatalog(query, cat) {
     results = results.filter(p =>
       p.nameTr.toLocaleLowerCase("tr").includes(q) ||
       p.nameLat.toLocaleLowerCase("tr").includes(q) ||
-      (p.care||"").toLocaleLowerCase("tr").includes(q)
+      (p.care||"").toLocaleLowerCase("tr").includes(q) ||
+      (p.family||"").toLocaleLowerCase("tr").includes(q)
     );
   }
 
@@ -554,11 +555,12 @@ function renderCatalog(query, cat) {
     let cls = "popular-plant-btn";
     if (sel) cls += " selected";
     if (inGarden && !sel) cls += " already-added";
+    const noTr = p.hasTr === false;
     return `<button class="${cls}" data-idx="${idx}" data-pid="${p.id}" type="button">
       ${sel    ? '<span class="sel-check">✓</span>' : ''}
       ${inGarden && !sel ? '<span class="already-badge">✓</span>' : ''}
       <span class="popular-emoji">${p.emoji}</span>
-      <span class="popular-name">${esc(p.nameTr)}</span>
+      <span class="popular-name">${esc(p.nameTr)}${noTr ? '<span class="no-tr-badge">EN</span>' : ''}</span>
     </button>`;
   }).join("");
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
