@@ -1644,12 +1644,25 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 .modal-detail-sheet {
   width: 100%;
   max-width: 520px;
-  border-radius: 0 0 18px 18px !important;
+  border-radius: 18px 18px 0 0 !important;
   padding: 0 !important;
-  max-height: 85vh;
+  height: 82vh;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.modal-detail-sheet .det-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 16px 16px 8px;
+}
+
+.modal-detail-sheet .det-action-bar {
+  flex-shrink: 0;
+  border-radius: 0 !important;
 }
 
 /* Kaydırılabilir içerik alanı */
@@ -1751,3 +1764,16 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 .det-btn-del   { color: var(--danger); }
 .det-btn-del span { color: var(--danger); }
 .det-btn-close { color: var(--muted); }
+
+/* ── Alttan açılan modal ── */
+.modal-bottom-backdrop {
+  align-items: flex-end !important;
+  padding: 0 !important;
+}
+.modal-bottom-backdrop .modal-detail-sheet {
+  margin: 0 auto;
+}
+@media (min-width: 600px) {
+  .modal-bottom-backdrop { justify-content: center; }
+  .modal-detail-sheet { border-radius: 18px !important; height: auto; max-height: 82vh; }
+}
