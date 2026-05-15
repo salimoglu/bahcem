@@ -531,12 +531,14 @@ function renderCatalog(query, cat) {
   if (activeCat && activeCat !== "all") {
     results = results.filter(p => p.category === activeCat);
   }
+  // Latince arama için İngilizce lowercase (I→i), Türkçe için tr locale (I→ı)
+  const qLat = q.toLowerCase(); // latince için
   if (q) {
     results = results.filter(p =>
-      p.nameTr.toLocaleLowerCase("tr").includes(q) ||
-      p.nameLat.toLocaleLowerCase("tr").includes(q) ||
+      (p.nameTr||"").toLocaleLowerCase("tr").includes(q) ||
+      (p.nameLat||"").toLowerCase().includes(qLat) ||
       (p.care||"").toLocaleLowerCase("tr").includes(q) ||
-      (p.family||"").toLocaleLowerCase("tr").includes(q)
+      (p.family||"").toLowerCase().includes(qLat)
     );
   }
 
