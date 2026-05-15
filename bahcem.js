@@ -549,7 +549,11 @@ function renderCatalog(query, cat) {
   // Bahçedeki mevcut bitki adları (küçük harfle karşılaştırma için)
   const existingNames = new Set(plants.map(p => (p.nameTr||"").toLocaleLowerCase("tr")));
 
-  grid.innerHTML = results.map(p => {
+  // Arama yoksa ilk 300'ü göster (performans)
+  const displayResults = q ? results : results.slice(0, 300);
+  const moreCount = q ? 0 : Math.max(0, results.length - 300);
+
+  grid.innerHTML = displayResults.map(p => {
     const idx = PLANTS_DB.indexOf(p);
     const sel = selectedPlants.has(p.id);
     const inGarden = existingNames.has(p.nameTr.toLocaleLowerCase("tr"));
