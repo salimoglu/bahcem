@@ -539,6 +539,17 @@ function renderCatalog(query, cat) {
       (p.family||"").toLocaleLowerCase("tr").includes(q)
     );
   }
+  // Sıralama: Türkçe isimli önce, sonra latince (nameTr=nameLat), sonra İngilizce
+  results = [...results].sort((a, b) => {
+    const score = p => {
+      if (p.hasTr !== false) return 0;          // Türkçe isim var
+      if ((p.nameTr||"") === (p.nameLat||"")) return 1; // nameTr=latince
+      return 2;                                  // İngilizce isim
+    };
+    const diff = score(a) - score(b);
+    if (diff !== 0) return diff;
+    return (a.nameTr||"").localeCompare(b.nameTr||"", "tr");
+  });
 
   const grid = document.getElementById("plant-search-results");
   if (!results.length) {
