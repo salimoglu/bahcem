@@ -1,3 +1,56 @@
+
+// ─── BAHÇEEMOJİ SEÇİCİ ───
+const GARDEN_EMOJIS = [
+  "🌿","🌱","🌲","🌳","🌴","🌵","🌾","🍀","🍁","🍂","🍃",
+  "🌸","🌺","🌻","🌹","🌷","💐","🌼","🪷","🫧","🪴","🪨",
+  "🏡","🏕️","🌄","🌅","☀️","🌤️","⛅","🌦️","🌿","🫚",
+  "🍎","🍊","🍋","🍇","🍓","🫐","🍒","🍑","🥭","🥝","🍅",
+  "🥕","🌽","🥦","🧅","🧄","🥬","🥒","🫑","🌶️","🧆"
+];
+
+function openGardenIconPicker(gid, currentIcon) {
+  const existing = document.getElementById("garden-icon-picker");
+  if (existing) existing.remove();
+
+  const picker = document.createElement("div");
+  picker.id = "garden-icon-picker";
+  picker.className = "garden-icon-picker";
+  picker.innerHTML = `
+    <div class="gip-header">
+      <span>Bahçe simgesi seç</span>
+      <button class="btn-icon gip-close" onclick="document.getElementById('garden-icon-picker').remove()">✕</button>
+    </div>
+    <div class="gip-grid">
+      ${GARDEN_EMOJIS.map(e => `<button class="gip-btn${e===currentIcon?" gip-active":""}" data-emoji="${e}">${e}</button>`).join("")}
+    </div>
+  `;
+
+  picker.querySelectorAll && setTimeout(() => {
+    picker.querySelectorAll(".gip-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const emoji = btn.dataset.emoji;
+        try {
+          await gardensCol().doc(gid).update({ icon: emoji });
+          toast("Simge güncellendi");
+        } catch(e) { toast("Hata: " + e.message); }
+        picker.remove();
+      });
+    });
+  }, 0);
+
+  document.body.appendChild(picker);
+
+  // Dışarı tıklayınca kapat
+  setTimeout(() => {
+    document.addEventListener("click", function handler(e) {
+      if (!picker.contains(e.target) && !e.target.closest(".garden-card-icon-btn")) {
+        picker.remove();
+        document.removeEventListener("click", handler);
+      }
+    });
+  }, 100);
+}
+
 // ===== TEMA =====
 (function () {
   const KEY = "bahcem-theme", themes = ["light","dark","blue"];
@@ -248,7 +301,7 @@ function renderGardens() {
   empty.classList.add("hidden");
   list.innerHTML = gardens.map(g => `
     <div class="garden-card" data-gid="${escA(g.id)}" role="button" tabindex="0">
-      <div class="garden-card-icon">🌿</div>
+      <button class="garden-card-icon-btn" onclick="event.stopPropagation();openGardenIconPicker('${escA(g.id)}','${escA(g.icon||'🌿')}')">${esc(g.icon||"🌿")}</button>
       <div class="garden-card-body">
         <h3>${esc(g.name)}</h3>
         <div class="garden-card-stats">
@@ -269,6 +322,7 @@ function renderGardens() {
 
 function openGarden(gid) {
   currentGardenId = gid;
+  const currentGarden = gardens.find(g => g.id === gid);
   const g = gardens.find(x => x.id === gid);
   document.getElementById("garden-title-display").textContent = g ? g.name : "";
   showScreen("screen-plants");
