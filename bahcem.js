@@ -401,13 +401,12 @@ function renderPlants() {
 function openPlantDetail(pid) {
   const p = plants.find(x => x.id === pid);
   if (!p) return;
+  const dbMatch = PLANTS_DB.find(x => x.id === p.plantId) || PLANTS_DB.find(x => x.nameTr === p.nameTr);
+  const freshCare = (dbMatch && dbMatch.care) ? dbMatch.care : (p.care || "");
   const st  = waterStatus(p);
   const cls = st.key==="late"?"badge-late": st.key==="ok"?"badge-ok":"badge-soon";
   const img = p.imageUrl ? `<img src="${escA(p.imageUrl)}" alt="" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:12px" onerror="this.style.display='none'"/>` : "";
   const link = p.wikiUrl ? `<a href="${escA(p.wikiUrl)}" target="_blank" rel="noopener" style="font-size:.85rem">Vikipedi'de aç ↗</a>` : "";
-
-  const dbMatch = PLANTS_DB.find(x=>x.id===p.plantId) || PLANTS_DB.find(x=>x.nameTr===p.nameTr);
-  const freshCare = dbMatch?.care || p.care || "";
 
   document.getElementById("plant-detail-content").innerHTML = `
     <div class="det-scroll">
