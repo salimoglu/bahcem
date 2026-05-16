@@ -106,9 +106,9 @@ function updateNotifStatus() {
 }
 
 function openSettingsModal() {
-  document.getElementById("pref-water-override").checked = getPrefWaterOverride();
-  document.getElementById("pref-water-days").value = String(getPrefWaterDays());
-  document.getElementById("pref-compact").checked = localStorage.getItem(PREF_COMPACT) === "1";
+  const elOv2 = document.getElementById("pref-water-override"); if(elOv2) elOv2.checked = getPrefWaterOverride();
+  const elD2 = document.getElementById("pref-water-days"); if(elD2) elD2.value = String(getPrefWaterDays());
+  const elCp2 = document.getElementById("pref-compact"); if(elCp2) elCp2.checked = localStorage.getItem(PREF_COMPACT) === "1";
   syncWaterDaysInputState();
   document.getElementById("modal-settings").classList.add("show");
 }
@@ -116,12 +116,13 @@ function closeSettingsModal() {
   document.getElementById("modal-settings").classList.remove("show");
 }
 function saveSettingsFromModal() {
-  let days = parseInt(document.getElementById("pref-water-days").value, 10);
+  const pwEl = document.getElementById("pref-water-days");
+  let days = pwEl ? parseInt(pwEl.value, 10) : getPrefWaterDays();
   if (!Number.isFinite(days)) days = 7;
   days = Math.min(90, Math.max(1, days));
   localStorage.setItem(PREF_WATER_DAYS, String(days));
-  localStorage.setItem(PREF_WATER_OVERRIDE, document.getElementById("pref-water-override").checked ? "1" : "0");
-  localStorage.setItem(PREF_COMPACT, document.getElementById("pref-compact").checked ? "1" : "0");
+  const pwOvEl = document.getElementById("pref-water-override"); localStorage.setItem(PREF_WATER_OVERRIDE, pwOvEl ? (pwOvEl.checked?"1":"0") : "0");
+  const cpEl = document.getElementById("pref-compact"); localStorage.setItem(PREF_COMPACT, cpEl ? (cpEl.checked?"1":"0") : "0");
   applyCompactFromStorage();
   closeSettingsModal();
   toast("Ayarlar kaydedildi ✓");
