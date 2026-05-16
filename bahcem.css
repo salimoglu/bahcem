@@ -167,6 +167,11 @@
   padding: 0;
   position: relative;
   overflow: hidden;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .theme-btn:hover { transform: scale(1.15); }
@@ -180,9 +185,7 @@
 .theme-btn[data-t="dark"]   { background: linear-gradient(135deg,#0d1f10,#1a2e1c); }
 .theme-btn[data-t="blue"]   { background: linear-gradient(135deg,#1976d2,#0d47a1); }
 
-.theme-btn[data-t="light"]::after { content:"🌿"; font-size:13px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
-.theme-btn[data-t="dark"]::after  { content:"🌙"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
-.theme-btn[data-t="blue"]::after  { content:"💧"; font-size:13px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); line-height:1; }
+/* emoji direkt buton içeriğinde */
 
 /* Tooltip */
 .theme-btn[data-t="light"] { position:relative; }
@@ -1280,6 +1283,11 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /* Başlık satırı */
@@ -1652,6 +1660,11 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .modal-detail-sheet .det-scroll {
