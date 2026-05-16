@@ -406,6 +406,9 @@ function openPlantDetail(pid) {
   const img = p.imageUrl ? `<img src="${escA(p.imageUrl)}" alt="" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:12px" onerror="this.style.display='none'"/>` : "";
   const link = p.wikiUrl ? `<a href="${escA(p.wikiUrl)}" target="_blank" rel="noopener" style="font-size:.85rem">Vikipedi'de aç ↗</a>` : "";
 
+  const dbMatch = PLANTS_DB.find(x=>x.id===p.plantId) || PLANTS_DB.find(x=>x.nameTr===p.nameTr);
+  const freshCare = dbMatch?.care || p.care || "";
+
   document.getElementById("plant-detail-content").innerHTML = `
     <div class="det-scroll">
       ${img}
@@ -420,7 +423,7 @@ function openPlantDetail(pid) {
         ${p.light ? `<span class="info-badge info-light">${esc(p.light)}</span>` : ""}
         <span class="det-last-water">Son sulama: <strong>${fmtDate(p.lastWateredAt)}</strong></span>
       </div>
-      ${(()=>{ const dbP=PLANTS_DB.find(x=>x.id===p.plantId) || PLANTS_DB.find(x=>x.nameTr===p.nameTr); const care=dbP?.care||p.care||""; return care ? `<div class="preview-box det-care">${esc(care)}</div>` : ""; })()}
+      ${freshCare ? `<div class="preview-box det-care">${esc(freshCare)}</div>` : ""}
       ${link ? `<div style="margin-bottom:10px">${link}</div>` : ""}
       <div class="det-interval-row">
         <label class="det-interval-label">Sulama aralığı</label>
