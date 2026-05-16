@@ -482,8 +482,7 @@ button:active, .btn:active { transform: scale(0.97); }
 .preview-box {
   background: var(--surface2); border-radius: 12px;
   padding: 12px; font-size: 0.85rem; line-height: 1.45;
-  max-height: 160px; overflow: auto; margin-bottom: 12px;
-  color: var(--text);
+  margin-bottom: 12px; color: var(--text);
 }
 
 .preview-box img { max-width: 100%; border-radius: 10px; margin-bottom: 8px; }
