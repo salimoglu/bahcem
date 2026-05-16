@@ -337,12 +337,40 @@ function openGarden(gid) {
 
 // ─── BAHÇE MODAL ───
 let gardenModalMode = "add";
+let selectedGardenIcon = "🌿";
 function openGardenModal(mode) {
   gardenModalMode = mode;
   const inp = document.getElementById("field-garden-name");
   document.getElementById("modal-garden-title").textContent = mode === "rename" ? "Bahçe adını değiştir" : "Yeni bahçe";
-  if (mode === "rename") { const g = gardens.find(x => x.id === currentGardenId); inp.value = g ? g.name : ""; }
+  const currentGarden = gardens.find(x => x.id === currentGardenId);
+  if (mode === "rename") { inp.value = currentGarden ? currentGarden.name : ""; }
   else inp.value = "";
+
+  // Emoji seçici
+  selectedGardenIcon = (mode === "rename" ? currentGarden?.icon : null) || "🌿";
+  const preview = document.getElementById("garden-icon-preview");
+  const grid    = document.getElementById("garden-icon-grid");
+  if (preview) preview.textContent = selectedGardenIcon;
+  if (grid) {
+    grid.style.display = "none";
+    grid.innerHTML = GARDEN_EMOJIS.map(e =>
+      `<button type="button" class="gig-btn${e===selectedGardenIcon?" gig-active":""}" data-emoji="${e}">${e}</button>`
+    ).join("");
+    grid.querySelectorAll(".gig-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedGardenIcon = btn.dataset.emoji;
+        grid.querySelectorAll(".gig-btn").forEach(b => b.classList.remove("gig-active"));
+        btn.classList.add("gig-active");
+        if (preview) preview.textContent = selectedGardenIcon;
+      });
+    });
+  }
+  if (preview) {
+    preview.onclick = () => {
+      if (grid) grid.style.display = grid.style.display === "none" ? "grid" : "none";
+    };
+  }
+
   document.getElementById("modal-garden").classList.add("show");
   setTimeout(() => inp.focus(), 100);
 }
@@ -356,7 +384,7 @@ async function saveGarden() {
   }
   try {
     if (gardenModalMode === "rename" && currentGardenId) {
-      await gardensCol().doc(currentGardenId).update({ name });
+      await gardensCol().doc(currentGardenId).update({ name, icon: selectedGardenIcon||"🌿" });
       document.getElementById("garden-title-display").textContent = name;
       toast("Ad güncellendi ✓");
     } else {
