@@ -420,7 +420,7 @@ function openPlantDetail(pid) {
         ${p.light ? `<span class="info-badge info-light">${esc(p.light)}</span>` : ""}
         <span class="det-last-water">Son sulama: <strong>${fmtDate(p.lastWateredAt)}</strong></span>
       </div>
-      ${(()=>{ const dbP=PLANTS_DB.find(x=>x.id===p.plantId); const care=dbP?.care||p.care||""; return care ? `<div class="preview-box det-care">${esc(care)}</div>` : ""; })()}
+      ${(()=>{ const dbP=PLANTS_DB.find(x=>x.id===p.plantId) || PLANTS_DB.find(x=>x.nameTr===p.nameTr); const care=dbP?.care||p.care||""; return care ? `<div class="preview-box det-care">${esc(care)}</div>` : ""; })()}
       ${link ? `<div style="margin-bottom:10px">${link}</div>` : ""}
       <div class="det-interval-row">
         <label class="det-interval-label">Sulama aralığı</label>
@@ -805,6 +805,7 @@ async function savePlant() {
       col.add({
         nameTr:              dbPlant.nameTr,
         nameLat:             dbPlant.nameLat  || "",
+        plantId:             dbPlant.id       || "",
         care:                dbPlant.care     || "",
         excerpt:             "",
         imageUrl:            imageUrl         || "",
