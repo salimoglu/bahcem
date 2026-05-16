@@ -420,7 +420,7 @@ function openPlantDetail(pid) {
         ${p.light ? `<span class="info-badge info-light">${esc(p.light)}</span>` : ""}
         <span class="det-last-water">Son sulama: <strong>${fmtDate(p.lastWateredAt)}</strong></span>
       </div>
-      ${p.care ? `<div class="preview-box det-care">${esc(p.care)}</div>` : ""}
+      ${(PLANTS_DB.find(x=>x.nameTr===p.nameTr)||{care:p.care}).care ? `<div class="preview-box det-care">${esc((PLANTS_DB.find(x=>x.nameTr===p.nameTr)||{care:p.care}).care)}</div>` : ""}
       ${link ? `<div style="margin-bottom:10px">${link}</div>` : ""}
       <div class="det-interval-row">
         <label class="det-interval-label">Sulama aralığı</label>
