@@ -189,6 +189,10 @@
 /* emoji direkt buton içeriğinde */
 
 /* Tooltip */
+.theme-btn[data-t="light"]::after { content:"🌿"; font-size:13px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.theme-btn[data-t="dark"]::after  { content:"🌙"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.theme-btn[data-t="blue"]::after  { content:"💧"; font-size:11px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+
 .theme-btn[data-t="light"] { position:relative; }
 .theme-btn::before {
   content: attr(title);
@@ -1816,41 +1820,3 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   font-style: italic;
 }
 
-/* ── Tema butonu ikonları (CSS, emoji yok) ── */
-
-/* Açık: küçük yeşil daire */
-.theme-btn[data-t="light"]::after {
-  content: "";
-  position: absolute;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: #2e7d32;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 3px rgba(46,125,50,0.25);
-}
-
-/* Koyu: beyaz ay yarısı */
-.theme-btn[data-t="dark"]::after {
-  content: "";
-  position: absolute;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2.5px solid #fff;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 3px -2px 0 0 #1a2e1c;
-}
-
-/* Mavi: beyaz damla */
-.theme-btn[data-t="blue"]::after {
-  content: "";
-  position: absolute;
-  width: 8px; height: 11px;
-  background: rgba(255,255,255,0.9);
-  top: 50%; left: 50%;
-  transform: translate(-50%, -48%);
-  clip-path: polygon(50% 0%, 100% 65%, 80% 90%, 20% 90%, 0% 65%);
-  border-radius: 50% 50% 40% 40%;
-}
