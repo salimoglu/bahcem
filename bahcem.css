@@ -1909,20 +1909,31 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 .garden-icon-preview-btn {
   font-size: 2rem;
   background: var(--surface2);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  width: 52px; height: 52px;
+  border: 2px solid var(--accent-light);
+  border-radius: 14px;
+  width: 64px; height: 64px;
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .garden-icon-preview-btn:hover {
   border-color: var(--accent);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .garden-icon-hint {
   font-size: 0.78rem;
   color: var(--muted);
+  line-height: 1.4;
+}
+.garden-icon-hint strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.82rem;
 }
 .gig-grid {
   display: grid;
