@@ -908,7 +908,6 @@ function wireOnce() {
   document.getElementById("modal-settings-close").addEventListener("click", closeSettingsModal);
   document.getElementById("btn-settings-save").addEventListener("click", saveSettingsFromModal);
   document.getElementById("modal-settings").addEventListener("click", e => { if (e.target.id === "modal-settings") closeSettingsModal(); });
-  document.getElementById("pref-water-override").addEventListener("change", syncWaterDaysInputState);
 
   // Ayarlar içindeki feedback gönder butonu
   document.getElementById("btn-feedback-send").addEventListener("click", submitFeedback);
