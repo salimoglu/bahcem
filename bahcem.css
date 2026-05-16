@@ -1898,3 +1898,52 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 }
 .gip-btn:hover  { background: var(--surface2); transform: scale(1.15); }
 .gip-btn.gip-active { background: var(--accent-light); }
+
+/* ── Bahçe modal emoji seçici ── */
+.garden-icon-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.garden-icon-preview-btn {
+  font-size: 2rem;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  width: 52px; height: 52px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.garden-icon-preview-btn:hover {
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+.garden-icon-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.gig-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 4px;
+}
+.gig-btn {
+  font-size: 1.3rem;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: background 0.1s, transform 0.1s;
+}
+.gig-btn:hover  { background: var(--surface); transform: scale(1.2); }
+.gig-btn.gig-active { border-color: var(--accent); background: var(--accent-light); }

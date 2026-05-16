@@ -1,11 +1,17 @@
 
-// ─── BAHÇEEMOJİ SEÇİCİ ───
 const GARDEN_EMOJIS = [
-  "🌿","🌱","🌲","🌳","🌴","🌵","🌾","🍀","🍁","🍂","🍃",
-  "🌸","🌺","🌻","🌹","🌷","💐","🌼","🪷","🫧","🪴","🪨",
-  "🏡","🏕️","🌄","🌅","☀️","🌤️","⛅","🌦️","🌿","🫚",
-  "🍎","🍊","🍋","🍇","🍓","🫐","🍒","🍑","🥭","🥝","🍅",
-  "🥕","🌽","🥦","🧅","🧄","🥬","🥒","🫑","🌶️","🧆"
+  // Ev & Mekan
+  "🏡","🏘️","🏠","🏚️","🏗️","🏕️","⛺","🛖","🏰","🏯",
+  // Bahçe & Doğa
+  "🌿","🌱","🪴","🌲","🌳","🌴","🌵","🌾","🍀","🍃","🍂","🍁",
+  // Çiçek
+  "🌸","🌺","🌻","🌹","🌷","💐","🌼","🪷",
+  // Tarla & Bağ & Bostan
+  "🌾","🫘","🌽","🥬","🥦","🥕","🧅","🧄","🫛","🫚",
+  "🍇","🍓","🫐","🍒","🍑","🍎","🍊","🍋","🥝","🍅",
+  "🚜","⛏️","🪣","🌊","💧","☀️","🌤️","🌈","🪨","🪵",
+  // Hayvan & Böcek
+  "🐝","🦋","🐛","🐞","🌏","🌍"
 ];
 
 function openGardenIconPicker(gid, currentIcon) {
@@ -354,7 +360,7 @@ async function saveGarden() {
       document.getElementById("garden-title-display").textContent = name;
       toast("Ad güncellendi ✓");
     } else {
-      await gardensCol().add({ name, createdAt: new Date().toISOString(), plantCount: 0 });
+      await gardensCol().add({ name, icon: selectedGardenIcon||"🌿", createdAt: new Date().toISOString(), plantCount: 0 });
       toast("Bahçe eklendi ✓");
     }
     closeGardenModal();
