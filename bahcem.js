@@ -846,28 +846,28 @@ function wireOnce() {
   })();
 
   // Geri
-  document.getElementById("btn-back").addEventListener("click", () => {
+  (document.getElementById("btn-back")||{addEventListener:()=>{}}).addEventListener("click", () => {
     if (unsubPlants) { unsubPlants(); unsubPlants = null; }
     showScreen("screen-gardens");
   });
 
   // Bahçe
-  document.getElementById("btn-add-garden").addEventListener("click",       () => openGardenModal("add"));
-  document.getElementById("btn-add-garden-empty").addEventListener("click", () => openGardenModal("add"));
-  document.getElementById("modal-garden-close").addEventListener("click",   closeGardenModal);
-  document.getElementById("btn-save-garden").addEventListener("click",      saveGarden);
-  document.getElementById("modal-garden").addEventListener("click", e => { if(e.target.id==="modal-garden") closeGardenModal(); });
-  document.getElementById("field-garden-name").addEventListener("keydown", e => { if(e.key==="Enter") saveGarden(); });
-  document.getElementById("btn-rename-garden").addEventListener("click", () => openGardenModal("rename"));
+  (document.getElementById("btn-add-garden")||{addEventListener:()=>{}}).addEventListener("click",       () => openGardenModal("add"));
+  (document.getElementById("btn-add-garden-empty")||{addEventListener:()=>{}}).addEventListener("click", () => openGardenModal("add"));
+  (document.getElementById("modal-garden-close")||{addEventListener:()=>{}}).addEventListener("click",   closeGardenModal);
+  (document.getElementById("btn-save-garden")||{addEventListener:()=>{}}).addEventListener("click",      saveGarden);
+  (document.getElementById("modal-garden")||{addEventListener:()=>{}}).addEventListener("click", e => { if(e.target.id==="modal-garden") closeGardenModal(); });
+  (document.getElementById("field-garden-name")||{addEventListener:()=>{}}).addEventListener("keydown", e => { if(e.key==="Enter") saveGarden(); });
+  (document.getElementById("btn-rename-garden")||{addEventListener:()=>{}}).addEventListener("click", () => openGardenModal("rename"));
 
   // Bitki ekle
-  document.getElementById("btn-add-plant").addEventListener("click",       openAddPlant);
-  document.getElementById("btn-add-plant-empty").addEventListener("click", openAddPlant);
-  document.getElementById("modal-plant-close").addEventListener("click",   closeAddPlant);
-  document.getElementById("modal-add-plant").addEventListener("click", e => { if(e.target.id==="modal-add-plant") closeAddPlant(); });
+  (document.getElementById("btn-add-plant")||{addEventListener:()=>{}}).addEventListener("click",       openAddPlant);
+  (document.getElementById("btn-add-plant-empty")||{addEventListener:()=>{}}).addEventListener("click", openAddPlant);
+  (document.getElementById("modal-plant-close")||{addEventListener:()=>{}}).addEventListener("click",   closeAddPlant);
+  (document.getElementById("modal-add-plant")||{addEventListener:()=>{}}).addEventListener("click", e => { if(e.target.id==="modal-add-plant") closeAddPlant(); });
 
   // Kategori sekmeleri
-  document.getElementById("cat-tabs").addEventListener("click", e => {
+  (document.getElementById("cat-tabs")||{addEventListener:()=>{}}).addEventListener("click", e => {
     const tab = e.target.closest(".cat-tab");
     if (!tab) return;
     document.querySelectorAll(".cat-tab").forEach(t => t.classList.remove("active"));
@@ -876,7 +876,7 @@ function wireOnce() {
   });
 
   // Canlı arama
-  document.getElementById("field-plant-search").addEventListener("input", e => {
+  (document.getElementById("field-plant-search")||{addEventListener:()=>{}}).addEventListener("input", e => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => renderCatalog(e.target.value), 200);
   });
@@ -891,26 +891,26 @@ function wireOnce() {
   });
 
   // Kaydet
-  document.getElementById("btn-save-plant").addEventListener("click", savePlant);
+  (document.getElementById("btn-save-plant")||{addEventListener:()=>{}}).addEventListener("click", savePlant);
 
   // Önizleme modalı kapat (backdrop tık)
-  document.getElementById("modal-plant-preview").addEventListener("click", e => {
+  (document.getElementById("modal-plant-preview")||{addEventListener:()=>{}}).addEventListener("click", e => {
     if (e.target.id === "modal-plant-preview") document.getElementById("modal-plant-preview").classList.remove("show");
   });
 
   // Detay kapat
 
-  document.getElementById("modal-plant-detail").addEventListener("click", e => {
+  (document.getElementById("modal-plant-detail")||{addEventListener:()=>{}}).addEventListener("click", e => {
     if(e.target.id==="modal-plant-detail") document.getElementById("modal-plant-detail").classList.remove("show");
   });
 
-  document.getElementById("btn-settings").addEventListener("click", openSettingsModal);
-  document.getElementById("modal-settings-close").addEventListener("click", closeSettingsModal);
-  document.getElementById("btn-settings-save").addEventListener("click", saveSettingsFromModal);
-  document.getElementById("modal-settings").addEventListener("click", e => { if (e.target.id === "modal-settings") closeSettingsModal(); });
+  (document.getElementById("btn-settings")||{addEventListener:()=>{}}).addEventListener("click", openSettingsModal);
+  (document.getElementById("modal-settings-close")||{addEventListener:()=>{}}).addEventListener("click", closeSettingsModal);
+  (document.getElementById("btn-settings-save")||{addEventListener:()=>{}}).addEventListener("click", saveSettingsFromModal);
+  (document.getElementById("modal-settings")||{addEventListener:()=>{}}).addEventListener("click", e => { if (e.target.id === "modal-settings") closeSettingsModal(); });
 
   // Ayarlar içindeki feedback gönder butonu
-  document.getElementById("btn-feedback-send").addEventListener("click", submitFeedback);
+  (document.getElementById("btn-feedback-send")||{addEventListener:()=>{}}).addEventListener("click", submitFeedback);
 }
 
 // ─── FCM BİLDİRİMLER ───
