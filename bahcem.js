@@ -1053,7 +1053,19 @@ async function registerSw() {
     const reg = await navigator.serviceWorker.register("/bahcem/sw.js", { updateViaCache: "none" });
     // Hemen güncelle
     await reg.update();
+    // Bekleyen veya yüklenen SW'yi hemen aktif et
     if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+    if (reg.installing) {
+      reg.installing.addEventListener("statechange", function() {
+        if (this.state === "installed") this.postMessage("skipWaiting");
+      });
+    }
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      if (sw) sw.addEventListener("statechange", function() {
+        if (this.state === "installed") this.postMessage("skipWaiting");
+      });
+    });
     // İzin zaten varsa token'ı yenile
     if (Notification.permission === "granted") {
       await saveFcmToken();
