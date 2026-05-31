@@ -55,7 +55,7 @@ exports.sulamaKontrol = onSchedule(
           const next = base + days * 86400000;
           const diffDays = Math.round((next - Date.now()) / 86400000);
           if (diffDays <= 0) {
-            overdueAll.push({ name: p.nameTr || "Bitki", late: Math.abs(diffDays), gardenName: g.name || "Bahçe" });
+            overdueAll.push({ name: p.nameTr || "Bitki", late: Math.abs(diffDays), gardenName: g.name || "Bahçe", gardenId: gardenDoc.id });
           }
         }
       }
@@ -92,8 +92,8 @@ exports.sulamaKontrol = onSchedule(
       }
 
       // Tek bahçe varsa direkt o bahçeye git
-      const gardenIds = Object.keys(byGarden);
-      const targetGardenId = gardenIds.length === 1 ? singleGardenId : null;
+      const uniqueGardenIds = [...new Set(overdueAll.map(p => p.gardenId))];
+      const targetGardenId = uniqueGardenIds.length === 1 ? uniqueGardenIds[0] : null;
       const link = targetGardenId
         ? `https://salimoglu.github.io/bahcem/?garden=${targetGardenId}`
         : "https://salimoglu.github.io/bahcem/";
