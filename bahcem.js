@@ -287,7 +287,7 @@ function renderGardens() {
   list.innerHTML = gardens.map(g => {
     const notifOn = g.notifOn === true;
     const notifHour = g.notifHour ?? 8;
-    const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+    const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
     const hourOptions = hours.map(h =>
       `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}:00</option>`
     ).join("");
