@@ -287,9 +287,14 @@ function renderGardens() {
   list.innerHTML = gardens.map(g => {
     const notifOn = g.notifOn === true;
     const notifHour = g.notifHour ?? 8;
+    const notifMin  = g.notifMin  ?? 0;
     const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+    const mins  = [0,15,30,45];
     const hourOptions = hours.map(h =>
-      `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}:00</option>`
+      `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}</option>`
+    ).join("");
+    const minOptions = mins.map(m =>
+      `<option value="${m}"${m===notifMin?" selected":""}>${String(m).padStart(2,"0")}</option>`
     ).join("");
     return `
     <div class="garden-card" data-gid="${escA(g.id)}" role="button" tabindex="0">
@@ -310,9 +315,15 @@ function renderGardens() {
             <span class="gc-notif-label">🔔 Bildirim</span>
           </label>
           ${notifOn ? `
-          <select class="gc-notif-hour" data-gid="${escA(g.id)}" onclick="event.stopPropagation()">
-            ${hourOptions}
-          </select>` : ""}
+          <span class="gc-notif-time-wrap">
+            <select class="gc-notif-hour" data-gid="${escA(g.id)}" onclick="event.stopPropagation()">
+              ${hourOptions}
+            </select>
+            <span class="gc-notif-sep">:</span>
+            <select class="gc-notif-min" data-gid="${escA(g.id)}" onclick="event.stopPropagation()">
+              ${minOptions}
+            </select>
+          </span>` : ""}
         </div>` : ""}
       </div>
       <svg class="garden-card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -334,13 +345,25 @@ function renderGardens() {
     });
   });
 
-  // Saat seçici
+  // Saat + dakika seçici
   list.querySelectorAll(".gc-notif-hour").forEach(sel => {
     sel.addEventListener("change", async () => {
-      const gid  = sel.dataset.gid;
+      const gid = sel.dataset.gid;
       const hour = Number(sel.value);
-      await gardensCol().doc(gid).update({ notifHour: hour });
-      toast(`Bildirim saati ${String(hour).padStart(2,"0")}:00 ✓`);
+      const minSel = list.querySelector(`.gc-notif-min[data-gid="${gid}"]`);
+      const min = minSel ? Number(minSel.value) : 0;
+      await gardensCol().doc(gid).update({ notifHour: hour, notifMin: min });
+      toast(`Bildirim saati ${String(hour).padStart(2,"0")}:${String(min).padStart(2,"0")} ✓`);
+    });
+  });
+  list.querySelectorAll(".gc-notif-min").forEach(sel => {
+    sel.addEventListener("change", async () => {
+      const gid = sel.dataset.gid;
+      const min = Number(sel.value);
+      const hourSel = list.querySelector(`.gc-notif-hour[data-gid="${gid}"]`);
+      const hour = hourSel ? Number(hourSel.value) : 8;
+      await gardensCol().doc(gid).update({ notifHour: hour, notifMin: min });
+      toast(`Bildirim saati ${String(hour).padStart(2,"0")}:${String(min).padStart(2,"0")} ✓`);
     });
   });
 }
