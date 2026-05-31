@@ -75,15 +75,15 @@ exports.sulamaKontrol = onSchedule(
       if (gardenNames.length === 1) {
         const gName = gardenNames[0];
         const plants = byGarden[gName];
-        title = `🌿 ${gName} — Sulama Zamanı`;
+        title = `🌿 Bahçem — Sulama Zamanı`;
         if (plants.length === 1) {
           body = plants[0].late === 0
-            ? `${plants[0].name} bugün sulanmalı 💧`
-            : `${plants[0].name} ${plants[0].late} gündür sulanmadı 💧`;
+            ? `${gName}: ${plants[0].name} bugün sulanmalı 💧`
+            : `${gName}: ${plants[0].name} ${plants[0].late} gündür sulanmadı 💧`;
         } else {
           const names = plants.slice(0,2).map(p=>p.name).join(", ");
-          const more  = plants.length > 2 ? ` +${plants.length-2} bitki` : "";
-          body = `${names}${more} sulama bekliyor 💧`;
+          const more  = plants.length > 2 ? ` +${plants.length-2}` : "";
+          body = `${gName}: ${names}${more} sulama bekliyor 💧`;
         }
       } else {
         title = "🌿 Bahçem — Sulama Zamanı";
