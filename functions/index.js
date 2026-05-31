@@ -9,11 +9,11 @@ const fcm = getMessaging();
 
 // Her saat başı çalışır
 exports.sulamaKontrol = onSchedule(
-  { schedule: "0,30 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
+  { schedule: "0 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
   async () => {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
     const currentHour = now.getHours();
-    const currentMin  = now.getMinutes();
+
 
     const usersSnap = await db.collection("users").get();
 
@@ -38,8 +38,7 @@ exports.sulamaKontrol = onSchedule(
 
         // Bu bahçenin bildirimi bu saat ve dakikada mı?
         const gardenHour = g.notifHour ?? 8;
-        const gardenMin  = g.notifMin  ?? 0;
-        if (gardenHour !== currentHour || gardenMin !== currentMin) continue;
+        if (gardenHour !== currentHour) continue;
 
         const plantsSnap = await db
           .collection("users").doc(uid)
@@ -94,7 +93,7 @@ exports.sulamaKontrol = onSchedule(
             fcmOptions: { link: "https://salimoglu.github.io/bahcem/" }
           }
         });
-        console.log(`✓ ${uid} → saat ${currentHour}:${String(currentMin).padStart(2,'0')}, ${count} bitki`);
+        console.log(`✓ ${uid} → saat ${currentHour}:00, ${count} bitki`);
       } catch (err) {
         console.warn(`✗ ${uid}: ${err.message}`);
         if (err.code === "messaging/registration-token-not-registered") {
