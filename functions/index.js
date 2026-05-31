@@ -12,20 +12,12 @@ exports.sulamaKontrol = onSchedule(
   { schedule: "0 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
   async () => {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
-    const currentHour = now.getHours(); // 0-23
+    const currentHour = now.getHours();
 
     const usersSnap = await db.collection("users").get();
 
     for (const userDoc of usersSnap.docs) {
       const uid = userDoc.id;
-
-      // Bildirim saatini al (varsayılan: 8)
-      const notifDoc = await db.collection("users").doc(uid)
-        .collection("settings").doc("notifications").get();
-      const preferredHour = notifDoc.exists ? (notifDoc.data().hour ?? 8) : 8;
-
-      // Bu kullanıcının saati değilse atla
-      if (preferredHour !== currentHour) continue;
 
       // FCM token
       const tokenDoc = await db.collection("users").doc(uid)
@@ -33,11 +25,20 @@ exports.sulamaKontrol = onSchedule(
       const token = tokenDoc.exists ? tokenDoc.data().token : null;
       if (!token) continue;
 
-      // Sulanması gereken bitkileri bul
+      // Tüm bahçeleri tara - sadece bildirimi açık ve bu saatte olanları
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
       const overdueAll = [];
 
       for (const gardenDoc of gardensSnap.docs) {
+        const g = gardenDoc.data();
+
+        // Bahçede bildirim kapalıysa atla
+        if (!g.notifOn) continue;
+
+        // Bu bahçenin bildirimi bu saatte mi?
+        const gardenHour = g.notifHour ?? 8;
+        if (gardenHour !== currentHour) continue;
+
         const plantsSnap = await db
           .collection("users").doc(uid)
           .collection("gardens").doc(gardenDoc.id)
@@ -54,9 +55,9 @@ exports.sulamaKontrol = onSchedule(
 
           if (diffDays <= 0) {
             overdueAll.push({
-              name: p.nameTr || p.nick || "Bitki",
+              name: p.nameTr || "Bitki",
               late: Math.abs(diffDays),
-              gardenName: gardenDoc.data().name || "Bahçe"
+              gardenName: g.name || "Bahçe"
             });
           }
         }

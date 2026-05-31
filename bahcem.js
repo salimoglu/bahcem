@@ -305,7 +305,15 @@ function renderGardens() {
   const empty = document.getElementById("gardens-empty");
   if (!gardens.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden");
-  list.innerHTML = gardens.map(g => `
+  const notifEnabled = Notification.permission === "granted";
+  list.innerHTML = gardens.map(g => {
+    const notifOn = g.notifOn === true;
+    const notifHour = g.notifHour ?? 8;
+    const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+    const hourOptions = hours.map(h =>
+      `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}:00</option>`
+    ).join("");
+    return `
     <div class="garden-card" data-gid="${escA(g.id)}" role="button" tabindex="0">
       <div class="garden-card-icon">${esc(g.icon||"🌿")}</div>
       <div class="garden-card-body">
@@ -317,12 +325,45 @@ function renderGardens() {
           ${(g.needWater||0) > 0 ? `<span class="gc-stat gc-warn">💧 ${g.needWater} sulama</span>` : ""}
           ` : ""}
         </div>
+        ${notifEnabled ? `
+        <div class="gc-notif-row" onclick="event.stopPropagation()">
+          <label class="gc-notif-toggle" title="${notifOn?"Bildirimi kapat":"Bildirimi aç"}">
+            <input type="checkbox" class="gc-notif-check" data-gid="${escA(g.id)}" ${notifOn?"checked":""}/>
+            <span class="gc-notif-label">🔔 Bildirim</span>
+          </label>
+          ${notifOn ? `
+          <select class="gc-notif-hour" data-gid="${escA(g.id)}" onclick="event.stopPropagation()">
+            ${hourOptions}
+          </select>` : ""}
+        </div>` : ""}
       </div>
       <svg class="garden-card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>`).join("");
+    </div>`;
+  }).join("");
+
   list.querySelectorAll(".garden-card").forEach(c => {
     c.addEventListener("click", () => openGarden(c.dataset.gid));
     c.addEventListener("keydown", e => { if (e.key==="Enter"||e.key===" ") openGarden(c.dataset.gid); });
+  });
+
+  // Bildirim toggle
+  list.querySelectorAll(".gc-notif-check").forEach(cb => {
+    cb.addEventListener("change", async () => {
+      const gid = cb.dataset.gid;
+      const on  = cb.checked;
+      await gardensCol().doc(gid).update({ notifOn: on });
+      renderGardens();
+    });
+  });
+
+  // Saat seçici
+  list.querySelectorAll(".gc-notif-hour").forEach(sel => {
+    sel.addEventListener("change", async () => {
+      const gid  = sel.dataset.gid;
+      const hour = Number(sel.value);
+      await gardensCol().doc(gid).update({ notifHour: hour });
+      toast(`Bildirim saati ${String(hour).padStart(2,"0")}:00 ✓`);
+    });
   });
 }
 
