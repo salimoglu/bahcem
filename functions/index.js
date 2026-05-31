@@ -7,21 +7,33 @@ initializeApp();
 const db  = getFirestore();
 const fcm = getMessaging();
 
-// Her gün sabah 08:00 (Türkiye = UTC+3 → UTC 05:00)
+// Her saat başı çalışır
 exports.sulamaKontrol = onSchedule(
-  { schedule: "0 5 * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
+  { schedule: "0 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
   async () => {
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
+    const currentHour = now.getHours(); // 0-23
+
     const usersSnap = await db.collection("users").get();
 
     for (const userDoc of usersSnap.docs) {
       const uid = userDoc.id;
 
-      // FCM token'ı al
-      const tokenDoc = await db.collection("users").doc(uid).collection("settings").doc("fcm").get();
+      // Bildirim saatini al (varsayılan: 8)
+      const notifDoc = await db.collection("users").doc(uid)
+        .collection("settings").doc("notifications").get();
+      const preferredHour = notifDoc.exists ? (notifDoc.data().hour ?? 8) : 8;
+
+      // Bu kullanıcının saati değilse atla
+      if (preferredHour !== currentHour) continue;
+
+      // FCM token
+      const tokenDoc = await db.collection("users").doc(uid)
+        .collection("settings").doc("fcm").get();
       const token = tokenDoc.exists ? tokenDoc.data().token : null;
       if (!token) continue;
 
-      // Tüm bahçeleri tara
+      // Sulanması gereken bitkileri bul
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
       const overdueAll = [];
 
@@ -52,7 +64,6 @@ exports.sulamaKontrol = onSchedule(
 
       if (overdueAll.length === 0) continue;
 
-      // Bildirim mesajı oluştur
       const count = overdueAll.length;
       let body;
       if (count === 1) {
@@ -69,10 +80,7 @@ exports.sulamaKontrol = onSchedule(
       try {
         await fcm.send({
           token,
-          notification: {
-            title: "🌿 Bahçem — Sulama Zamanı",
-            body
-          },
+          notification: { title: "🌿 Bahçem — Sulama Zamanı", body },
           webpush: {
             notification: {
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
@@ -80,15 +88,12 @@ exports.sulamaKontrol = onSchedule(
               requireInteraction: true,
               tag: "bahcem-water"
             },
-            fcmOptions: {
-              link: "https://salimoglu.github.io/bahcem/"
-            }
+            fcmOptions: { link: "https://salimoglu.github.io/bahcem/" }
           }
         });
-        console.log(`✓ Bildirim gönderildi: ${uid} → ${count} bitki`);
+        console.log(`✓ ${uid} → saat ${currentHour}:00, ${count} bitki`);
       } catch (err) {
         console.warn(`✗ ${uid}: ${err.message}`);
-        // Geçersiz token → sil
         if (err.code === "messaging/registration-token-not-registered") {
           await db.collection("users").doc(uid).collection("settings").doc("fcm").delete();
         }
@@ -96,6 +101,3 @@ exports.sulamaKontrol = onSchedule(
     }
   }
 );
-// deploy trigger Sun May 31 14:29:39 UTC 2026
-// redeploy Sun May 31 14:54:38 UTC 2026
-// redeploy Sun May 31 15:07:38 UTC 2026

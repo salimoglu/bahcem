@@ -213,10 +213,31 @@
       <h2>Ayarlar</h2>
       <div class="settings-block">
         <h3 class="settings-heading">Sulama Bildirimleri</h3>
-        <p class="settings-hint">Her sabah saat 08:00'de sulanması gereken bitkiler için telefona bildirim gelir. Uygulama kapalı olsa bile çalışır.</p>
+        <p class="settings-hint">Seçtiğiniz saatte sulanması gereken bitkiler için bildirim gelir. Uygulama kapalı olsa bile çalışır.</p>
         <div class="settings-notif-row">
           <div id="notif-status-text" class="settings-notif-status">⏳ Kontrol ediliyor…</div>
           <button type="button" id="btn-notif-toggle" class="btn btn-primary btn-sm" style="display:none">Bildirimleri Aç</button>
+        </div>
+        <div class="settings-notif-time-row" id="notif-time-row" style="display:none">
+          <label for="notif-hour-select">Bildirim saati</label>
+          <select id="notif-hour-select" class="notif-hour-select">
+            <option value="6">06:00</option>
+            <option value="7">07:00</option>
+            <option value="8" selected>08:00</option>
+            <option value="9">09:00</option>
+            <option value="10">10:00</option>
+            <option value="11">11:00</option>
+            <option value="12">12:00</option>
+            <option value="13">13:00</option>
+            <option value="14">14:00</option>
+            <option value="15">15:00</option>
+            <option value="16">16:00</option>
+            <option value="17">17:00</option>
+            <option value="18">18:00</option>
+            <option value="19">19:00</option>
+            <option value="20">20:00</option>
+            <option value="21">21:00</option>
+          </select>
         </div>
       </div>
       <div class="settings-block">

@@ -981,6 +981,10 @@ function wireOnce() {
   // Kaydet
   (document.getElementById("btn-save-plant")||{addEventListener:()=>{}}).addEventListener("click", savePlant);
 
+  // Bildirim saati değişince kaydet
+  const hourSel = document.getElementById("notif-hour-select");
+  if (hourSel) hourSel.addEventListener("change", e => saveNotifHour(e.target.value));
+
   // Önizleme modalı kapat (backdrop tık)
   (document.getElementById("modal-plant-preview")||{addEventListener:()=>{}}).addEventListener("click", e => {
     if (e.target.id === "modal-plant-preview") document.getElementById("modal-plant-preview").classList.remove("show");
@@ -1045,22 +1049,51 @@ async function saveFcmToken() {
 }
 
 function updateNotifStatus() {
-  const st  = document.getElementById("notif-status-text");
-  const btn = document.getElementById("btn-notif-toggle");
+  const st      = document.getElementById("notif-status-text");
+  const btn     = document.getElementById("btn-notif-toggle");
+  const timeRow = document.getElementById("notif-time-row");
   if (!st || !btn) return;
   if (!("Notification" in window)) {
     st.textContent = "❌ Bu tarayıcı bildirimleri desteklemiyor";
-    btn.style.display = "none"; return;
+    btn.style.display = "none";
+    if (timeRow) timeRow.style.display = "none";
+    return;
   }
   if (Notification.permission === "granted") {
-    st.textContent = "✅ Bildirimler açık — Her sabah 08:00'de kontrol edilir";
+    st.textContent = "✅ Bildirimler açık";
     btn.style.display = "none";
+    if (timeRow) timeRow.style.display = "flex";
+    // Kayıtlı saati yükle
+    loadNotifHour();
   } else if (Notification.permission === "denied") {
     st.textContent = "🚫 Engellendi — Tarayıcı ayarlarından izin verin";
     btn.style.display = "none";
+    if (timeRow) timeRow.style.display = "none";
   } else {
     st.textContent = "🔔 Bildirimler kapalı";
     btn.style.display = "inline-flex";
+    if (timeRow) timeRow.style.display = "none";
     btn.onclick = async () => { await requestNotifPermission(); };
   }
+}
+
+async function loadNotifHour() {
+  if (!currentUser) return;
+  try {
+    const doc = await db.collection("users").doc(currentUser.uid)
+      .collection("settings").doc("notifications").get();
+    const hour = doc.exists ? (doc.data().hour ?? 8) : 8;
+    const sel = document.getElementById("notif-hour-select");
+    if (sel) sel.value = String(hour);
+  } catch(e) {}
+}
+
+async function saveNotifHour(hour) {
+  if (!currentUser) return;
+  try {
+    await db.collection("users").doc(currentUser.uid)
+      .collection("settings").doc("notifications")
+      .set({ hour: Number(hour) }, { merge: true });
+    toast(`Bildirim saati ${String(hour).padStart(2,"0")}:00 olarak ayarlandı ✓`);
+  } catch(e) { toast("Kayıt hatası: " + e.message); }
 }
