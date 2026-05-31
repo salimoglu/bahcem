@@ -70,8 +70,15 @@ exports.sulamaKontrol = onSchedule(
       try {
         await fcm.send({
           token,
-          data: { title, body, url },
-          webpush: { fcmOptions: { link: url } }
+          webpush: {
+            notification: { title, body,
+              icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
+              requireInteraction: true,
+              tag: "bahcem-water"
+            },
+            data: { url },
+            fcmOptions: { link: url }
+          }
         });
         console.log(`✓ ${uid}: ${body}`);
       } catch (err) {
