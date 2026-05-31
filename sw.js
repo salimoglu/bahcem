@@ -1,67 +1,38 @@
-// v20260531-fix-notif
-const CACHE = 'bahcem-v20260531-fix';
-
-self.addEventListener('install', e => {
-  self.skipWaiting();
-});
-
+// v20260531-nocache
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
+  e.waitUntil(caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))).then(() => self.clients.claim()));
 });
 
+// Cache kullanma - her zaman network
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request).then(res => {
-      const clone = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
-      return res;
-    }).catch(() => caches.match(e.request))
-  );
+  e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
 });
 
+// Push bildirimi
 self.addEventListener('push', e => {
-  let title = '🌿 Bahçem — Sulama Zamanı';
-  let body  = 'Sulama zamanı geldi!';
-
-  let url = 'https://salimoglu.github.io/bahcem/';
-  if (e.data) {
-    try {
-      const d = e.data.json();
-      if (d.title) title = d.title;
-      if (d.body)  body  = d.body;
-      if (d.url)   url   = d.url;
-    } catch(err) {
-      const text = e.data.text();
-      if (text) body = text;
-    }
-  }
-
-  e.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon:  '/bahcem/icons/icon-192.png',
-      badge: '/bahcem/icons/icon-192.png',
-      tag:   'bahcem-water',
-      requireInteraction: true,
-      data:  { url }
-    })
-  );
+  let title = '🌿 Bahçem';
+  let body  = 'Sulama zamanı!';
+  let url   = 'https://salimoglu.github.io/bahcem/';
+  try {
+    const d = e.data.json();
+    if (d.title) title = d.title;
+    if (d.body)  body  = d.body;
+    if (d.url)   url   = d.url;
+  } catch(e) {}
+  e.waitUntil(self.registration.showNotification(title, {
+    body, icon: '/bahcem/icons/icon-192.png',
+    badge: '/bahcem/icons/icon-192.png',
+    tag: 'bahcem-water', requireInteraction: true,
+    data: { url }
+  }));
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || 'https://salimoglu.github.io/bahcem/';
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      for (const c of list) {
-        if (c.url === url && 'focus' in c) return c.focus();
-      }
-      return clients.openWindow(url);
-    })
-  );
+  const url = e.notification.data?.url || 'https://salimoglu.github.io/bahcem/';
+  e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list => {
+    for (const c of list) if (c.url.includes('bahcem') && 'focus' in c) return c.focus();
+    return clients.openWindow(url);
+  }));
 });

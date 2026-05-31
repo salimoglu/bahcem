@@ -12,109 +12,72 @@ exports.sulamaKontrol = onSchedule(
   async () => {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
     const currentHour = now.getHours();
-    console.log(`Çalışıyor: saat ${currentHour}:00`);
+    console.log(`Saat: ${currentHour}`);
 
-    // fcm_tokens koleksiyonundan tüm tokenları oku
     const tokensSnap = await db.collection("fcm_tokens").get();
-    console.log(`FCM token sayısı: ${tokensSnap.size}`);
+    console.log(`Token sayısı: ${tokensSnap.size}`);
 
     for (const tokenDoc of tokensSnap.docs) {
-      const uid   = tokenDoc.data().uid;
-      const token = tokenDoc.data().token;
-      if (!token || !uid) continue;
-      console.log(`Kullanıcı: ${uid}`);
+      const { uid, token } = tokenDoc.data();
+      if (!uid || !token) continue;
 
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
-      console.log(`${uid}: ${gardensSnap.size} bahçe`);
+      const overdue = [];
+      let targetGardenId = null;
 
-      const overdueAll = [];
-      let singleGardenId = null;
-
-      for (const gardenDoc of gardensSnap.docs) {
-        const g = gardenDoc.data();
+      for (const gDoc of gardensSnap.docs) {
+        const g = gDoc.data();
         if (!g.notifOn) continue;
+        if ((g.notifHour ?? 8) !== currentHour) continue;
+        targetGardenId = gDoc.id;
 
-        const gardenHour = g.notifHour ?? 8;
-        if (gardenHour !== currentHour) {
-          console.log(`${g.name}: saat uyuşmuyor (${gardenHour} != ${currentHour})`);
-          continue;
-        }
-        singleGardenId = gardenDoc.id;
+        const plantsSnap = await db.collection("users").doc(uid)
+          .collection("gardens").doc(gDoc.id).collection("plants").get();
 
-        const plantsSnap = await db
-          .collection("users").doc(uid)
-          .collection("gardens").doc(gardenDoc.id)
-          .collection("plants").get();
-
-        for (const plantDoc of plantsSnap.docs) {
-          const p = plantDoc.data();
+        for (const pDoc of plantsSnap.docs) {
+          const p = pDoc.data();
           const days = Math.max(1, Number(p.wateringIntervalDays) || 7);
-          const base = p.lastWateredAt
-            ? new Date(p.lastWateredAt).getTime()
-            : new Date(p.createdAt || Date.now()).getTime();
-          const next = base + days * 86400000;
-          const diffDays = Math.round((next - Date.now()) / 86400000);
-          if (diffDays <= 0) {
-            overdueAll.push({ name: p.nameTr || "Bitki", late: Math.abs(diffDays), gardenName: g.name || "Bahçe", gardenId: gardenDoc.id });
+          const base = p.lastWateredAt ? new Date(p.lastWateredAt).getTime() : new Date(p.createdAt || Date.now()).getTime();
+          if (Date.now() >= base + days * 86400000) {
+            overdue.push({ name: p.nameTr || "Bitki", gardenName: g.name || "Bahçe", gardenId: gDoc.id });
           }
         }
       }
 
-      console.log(`${uid}: ${overdueAll.length} sulanmamış bitki`);
-      if (overdueAll.length === 0) continue;
+      if (!overdue.length) { console.log(`${uid}: sulanmamış bitki yok`); continue; }
 
-      const count = overdueAll.length;
       // Bahçe bazında grupla
       const byGarden = {};
-      for (const p of overdueAll) {
+      for (const p of overdue) {
         if (!byGarden[p.gardenName]) byGarden[p.gardenName] = [];
-        byGarden[p.gardenName].push(p);
+        byGarden[p.gardenName].push(p.name);
       }
-      const gardenNames = Object.keys(byGarden);
-      let title, body;
-      if (gardenNames.length === 1) {
-        const gName = gardenNames[0];
-        const plants = byGarden[gName];
-        title = `🌿 Bahçem — Sulama Zamanı`;
-        if (plants.length === 1) {
-          body = plants[0].late === 0
-            ? `${gName}: ${plants[0].name} bugün sulanmalı 💧`
-            : `${gName}: ${plants[0].name} ${plants[0].late} gündür sulanmadı 💧`;
-        } else {
-          const names = plants.slice(0,2).map(p=>p.name).join(", ");
-          const more  = plants.length > 2 ? ` +${plants.length-2}` : "";
-          body = `${gName}: ${names}${more} sulama bekliyor 💧`;
-        }
-      } else {
-        title = "🌿 Bahçem — Sulama Zamanı";
-        const parts = gardenNames.map(g => `${g}: ${byGarden[g].length} bitki`);
-        body = parts.join(" • ") + " sulama bekliyor 💧";
-      }
+      const gardens = Object.keys(byGarden);
+      const title = "🌿 Bahçem — Sulama Zamanı";
+      let body, url;
 
-      // Tek bahçe varsa direkt o bahçeye git
-      const uniqueGardenIds = [...new Set(overdueAll.map(p => p.gardenId))];
-      const targetGardenId = uniqueGardenIds.length === 1 ? uniqueGardenIds[0] : null;
-      const link = targetGardenId
-        ? `https://salimoglu.github.io/bahcem/?garden=${targetGardenId}`
-        : "https://salimoglu.github.io/bahcem/";
+      if (gardens.length === 1) {
+        const gName = gardens[0];
+        const names = byGarden[gName];
+        const preview = names.slice(0,2).join(", ") + (names.length > 2 ? ` +${names.length-2}` : "");
+        body = `${gName}: ${preview} sulama bekliyor 💧`;
+        url  = `https://salimoglu.github.io/bahcem/?garden=${overdue[0].gardenId}`;
+      } else {
+        body = gardens.map(g => `${g}: ${byGarden[g].length} bitki`).join(" • ") + " 💧";
+        url  = "https://salimoglu.github.io/bahcem/";
+      }
 
       try {
         await fcm.send({
           token,
-          data: { title, body, url: link },
-          webpush: {
-            headers: { Urgency: "high" },
-            fcmOptions: { link }
-          }
+          data: { title, body, url },
+          webpush: { fcmOptions: { link: url } }
         });
-        console.log(`✓ Bildirim gönderildi: ${uid}`);
+        console.log(`✓ ${uid}: ${body}`);
       } catch (err) {
-        console.error(`✗ FCM hatası: ${err.message}`);
-        if (err.code === "messaging/registration-token-not-registered") {
-          await tokenDoc.ref.delete();
-        }
+        console.error(`✗ ${uid}: ${err.message}`);
+        if (err.code === "messaging/registration-token-not-registered") await tokenDoc.ref.delete();
       }
     }
-    console.log("Tamamlandı");
   }
 );
