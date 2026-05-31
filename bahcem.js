@@ -1047,7 +1047,11 @@ async function registerSw() {
 
     // Mevcut SW'yi kontrol et — arka planda güncelleme ara
     if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+    // Sonsuz döngüyü önle - sadece bir kez yenile
+    let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloading) return;
+      reloading = true;
       window.location.reload();
     });
 
