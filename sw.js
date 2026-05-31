@@ -1,42 +1,52 @@
-// v20260531c
-const CACHE = 'bahcem-v20260531c';
+// v20260531-fix-notif
+const CACHE = 'bahcem-v20260531-fix';
 
 self.addEventListener('install', e => {
-  self.skipWaiting(); // Hemen aktif ol, bekleme
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim()) // Tüm sekmeleri hemen ele geçir
+    ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  // Network first — her zaman en güncel versiyon
   e.respondWith(
     fetch(e.request).then(res => {
-      // Başarılı response'u cache'e yaz
       const clone = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, clone));
       return res;
-    }).catch(() => caches.match(e.request)) // Offline'da cache'den
+    }).catch(() => caches.match(e.request))
   );
 });
 
-// Push bildirimleri
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {};
+  let title = '🌿 Bahçem — Sulama Zamanı';
+  let body  = 'Sulama zamanı geldi!';
+
+  if (e.data) {
+    try {
+      const d = e.data.json();
+      if (d.title) title = d.title;
+      if (d.body)  body  = d.body;
+    } catch(err) {
+      const text = e.data.text();
+      if (text) body = text;
+    }
+  }
+
   e.waitUntil(
-    self.registration.showNotification(data.title || 'Bahçem', {
-      body: data.body || 'Sulama zamanı!',
-      icon: '/bahcem/icons/icon-192.png',
+    self.registration.showNotification(title, {
+      body,
+      icon:  '/bahcem/icons/icon-192.png',
       badge: '/bahcem/icons/icon-192.png',
-      tag: 'bahcem-water',
+      tag:   'bahcem-water',
       requireInteraction: true,
-      data: { url: 'https://salimoglu.github.io/bahcem/' }
+      data:  { url: 'https://salimoglu.github.io/bahcem/' }
     })
   );
 });
