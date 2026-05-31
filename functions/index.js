@@ -92,9 +92,12 @@ exports.sulamaKontrol = onSchedule(
       try {
         await fcm.send({
           token,
-          notification: { title, body },
           webpush: {
+            headers: { Urgency: "high" },
+            data: { title, body },
             notification: {
+              title,
+              body,
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
               badge: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
               requireInteraction: true,
