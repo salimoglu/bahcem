@@ -14,22 +14,17 @@ exports.sulamaKontrol = onSchedule(
     const currentHour = now.getHours();
     console.log(`Çalışıyor: saat ${currentHour}:00`);
 
-    const usersSnap = await db.collection("users").get();
-    console.log(`Kullanıcı sayısı: ${usersSnap.size}`);
+    // Tüm FCM tokenlarını tara — doküman olmasa bile çalışır
+    const fcmSnap = await db.collectionGroup("fcm").get();
+    console.log(`FCM token sayısı: ${fcmSnap.size}`);
 
-    for (const userDoc of usersSnap.docs) {
-      const uid = userDoc.id;
+    for (const fcmDoc of fcmSnap.docs) {
+      const token = fcmDoc.data().token;
+      if (!token) continue;
+
+      // UID: users/{uid}/settings/fcm → path[1]
+      const uid = fcmDoc.ref.path.split("/")[1];
       console.log(`Kullanıcı: ${uid}`);
-
-      const tokenDoc = await db.collection("users").doc(uid)
-        .collection("settings").doc("fcm").get();
-      
-      if (!tokenDoc.exists) {
-        console.log(`${uid}: FCM token yok`);
-        continue;
-      }
-      const token = tokenDoc.data().token;
-      console.log(`${uid}: Token var`);
 
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
       console.log(`${uid}: ${gardensSnap.size} bahçe`);
@@ -40,11 +35,11 @@ exports.sulamaKontrol = onSchedule(
         const g = gardenDoc.data();
         console.log(`Bahçe: ${g.name}, notifOn: ${g.notifOn}, notifHour: ${g.notifHour}`);
 
-        if (!g.notifOn) { console.log("Bildirim kapalı, atlandı"); continue; }
-        
+        if (!g.notifOn) continue;
+
         const gardenHour = g.notifHour ?? 8;
         if (gardenHour !== currentHour) {
-          console.log(`Saat uyuşmuyor: bahçe=${gardenHour}, şu an=${currentHour}`);
+          console.log(`Saat uyuşmuyor: bahçe=${gardenHour}, şuan=${currentHour}`);
           continue;
         }
 
@@ -93,7 +88,7 @@ exports.sulamaKontrol = onSchedule(
       } catch (err) {
         console.error(`✗ FCM hatası: ${err.message}`);
         if (err.code === "messaging/registration-token-not-registered") {
-          await db.collection("users").doc(uid).collection("settings").doc("fcm").delete();
+          await fcmDoc.ref.delete();
         }
       }
     }
