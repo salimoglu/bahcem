@@ -28,11 +28,13 @@ self.addEventListener('push', e => {
   let title = '🌿 Bahçem — Sulama Zamanı';
   let body  = 'Sulama zamanı geldi!';
 
+  let url = 'https://salimoglu.github.io/bahcem/';
   if (e.data) {
     try {
       const d = e.data.json();
       if (d.title) title = d.title;
       if (d.body)  body  = d.body;
+      if (d.url)   url   = d.url;
     } catch(err) {
       const text = e.data.text();
       if (text) body = text;
@@ -46,7 +48,7 @@ self.addEventListener('push', e => {
       badge: '/bahcem/icons/icon-192.png',
       tag:   'bahcem-water',
       requireInteraction: true,
-      data:  { url: 'https://salimoglu.github.io/bahcem/' }
+      data:  { url }
     })
   );
 });

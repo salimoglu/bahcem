@@ -28,6 +28,7 @@ exports.sulamaKontrol = onSchedule(
       console.log(`${uid}: ${gardensSnap.size} bahçe`);
 
       const overdueAll = [];
+      let singleGardenId = null;
 
       for (const gardenDoc of gardensSnap.docs) {
         const g = gardenDoc.data();
@@ -38,6 +39,7 @@ exports.sulamaKontrol = onSchedule(
           console.log(`${g.name}: saat uyuşmuyor (${gardenHour} != ${currentHour})`);
           continue;
         }
+        singleGardenId = gardenDoc.id;
 
         const plantsSnap = await db
           .collection("users").doc(uid)
@@ -89,13 +91,20 @@ exports.sulamaKontrol = onSchedule(
         body = parts.join(" • ") + " sulama bekliyor 💧";
       }
 
+      // Tek bahçe varsa direkt o bahçeye git
+      const gardenIds = Object.keys(byGarden);
+      const targetGardenId = gardenIds.length === 1 ? singleGardenId : null;
+      const link = targetGardenId
+        ? `https://salimoglu.github.io/bahcem/?garden=${targetGardenId}`
+        : "https://salimoglu.github.io/bahcem/";
+
       try {
         await fcm.send({
           token,
-          data: { title, body },
+          data: { title, body, url: link },
           webpush: {
             headers: { Urgency: "high" },
-            fcmOptions: { link: "https://salimoglu.github.io/bahcem/" }
+            fcmOptions: { link }
           }
         });
         console.log(`✓ Bildirim gönderildi: ${uid}`);

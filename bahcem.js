@@ -938,6 +938,20 @@ function wireOnce() {
   if (appWired) return;
   appWired = true;
 
+  // Bildirim tıklamasından gelen deep link
+  const params = new URLSearchParams(window.location.search);
+  const gardenParam = params.get("garden");
+  if (gardenParam) {
+    // URL'i temizle
+    window.history.replaceState({}, "", window.location.pathname);
+    // Bahçe yüklenince aç
+    const unsubDeep = setInterval(() => {
+      const g = gardens.find(g => g.id === gardenParam);
+      if (g) { clearInterval(unsubDeep); openGarden(gardenParam); }
+    }, 300);
+    setTimeout(() => clearInterval(unsubDeep), 5000);
+  }
+
   // PLANTS_DB'yi bir kez sırala: Türkçe → Latince → İngilizce
   (function() {
     const score = p => {
