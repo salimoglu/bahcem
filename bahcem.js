@@ -1043,32 +1043,17 @@ const FCM_VAPID_KEY = "BJkthDNlxjQzoiiX_b5-aevw9u7mFjqk6VOdIBTq5RfrD9IbH6cuWTJ6K
 
 async function registerSw() {
   if (!("serviceWorker" in navigator)) return;
-  if (location.protocol !== "https:" && location.hostname !== "localhost") return;
   try {
-    const reg = await navigator.serviceWorker.register("sw.js");
-
-    // Güncelleme var mı kontrol et
-    reg.addEventListener("updatefound", () => {
-      const newSW = reg.installing;
-      if (!newSW) return;
-      newSW.addEventListener("statechange", () => {
-        if (newSW.state === "activated") {
-          // Yeni SW aktif oldu, sayfayı sessizce yenile
-          window.location.reload();
-        }
-      });
-    });
-
-    // Mevcut SW'yi kontrol et — arka planda güncelleme ara
+    // Önce tüm eski SW kayıtlarını sil
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) {
+      if (!r.scope.includes("bahcem")) await r.unregister();
+    }
+    // Yeni SW'yi kaydet
+    const reg = await navigator.serviceWorker.register("/bahcem/sw.js", { updateViaCache: "none" });
+    // Hemen güncelle
+    await reg.update();
     if (reg.waiting) reg.waiting.postMessage("skipWaiting");
-    // Sonsuz döngüyü önle - sadece bir kez yenile
-    let reloading = false;
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (reloading) return;
-      reloading = true;
-      window.location.reload();
-    });
-
     // İzin zaten varsa token'ı yenile
     if (Notification.permission === "granted") {
       await saveFcmToken();
