@@ -9,7 +9,7 @@ const fcm = getMessaging();
 
 // Her saat başı çalışır
 exports.sulamaKontrol = onSchedule(
-  { schedule: "0,15,30,45 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
+  { schedule: "0,30 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
   async () => {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" }));
     const currentHour = now.getHours();
