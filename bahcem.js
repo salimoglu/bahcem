@@ -1079,9 +1079,13 @@ async function saveFcmToken() {
     const swReg = await navigator.serviceWorker.ready;
     const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg });
     if (token) {
+      // Kullanıcı ayarlarına kaydet
       await db.collection("users").doc(currentUser.uid)
         .collection("settings").doc("fcm")
         .set({ token, updatedAt: new Date().toISOString() });
+      // Cloud Function için ayrı koleksiyona kaydet
+      await db.collection("fcm_tokens").doc(currentUser.uid)
+        .set({ token, uid: currentUser.uid, updatedAt: new Date().toISOString() });
     }
   } catch(e) { console.warn("FCM token alınamadı:", e.message); }
 }

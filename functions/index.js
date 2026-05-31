@@ -14,16 +14,14 @@ exports.sulamaKontrol = onSchedule(
     const currentHour = now.getHours();
     console.log(`Çalışıyor: saat ${currentHour}:00`);
 
-    // Tüm FCM tokenlarını tara — doküman olmasa bile çalışır
-    const fcmSnap = await db.collectionGroup("fcm").get();
-    console.log(`FCM token sayısı: ${fcmSnap.size}`);
+    // fcm_tokens koleksiyonundan tüm tokenları oku
+    const tokensSnap = await db.collection("fcm_tokens").get();
+    console.log(`FCM token sayısı: ${tokensSnap.size}`);
 
-    for (const fcmDoc of fcmSnap.docs) {
-      const token = fcmDoc.data().token;
-      if (!token) continue;
-
-      // UID: users/{uid}/settings/fcm → path[1]
-      const uid = fcmDoc.ref.path.split("/")[1];
+    for (const tokenDoc of tokensSnap.docs) {
+      const uid   = tokenDoc.data().uid;
+      const token = tokenDoc.data().token;
+      if (!token || !uid) continue;
       console.log(`Kullanıcı: ${uid}`);
 
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
@@ -33,13 +31,11 @@ exports.sulamaKontrol = onSchedule(
 
       for (const gardenDoc of gardensSnap.docs) {
         const g = gardenDoc.data();
-        console.log(`Bahçe: ${g.name}, notifOn: ${g.notifOn}, notifHour: ${g.notifHour}`);
-
         if (!g.notifOn) continue;
 
         const gardenHour = g.notifHour ?? 8;
         if (gardenHour !== currentHour) {
-          console.log(`Saat uyuşmuyor: bahçe=${gardenHour}, şuan=${currentHour}`);
+          console.log(`${g.name}: saat uyuşmuyor (${gardenHour} != ${currentHour})`);
           continue;
         }
 
@@ -88,7 +84,7 @@ exports.sulamaKontrol = onSchedule(
       } catch (err) {
         console.error(`✗ FCM hatası: ${err.message}`);
         if (err.code === "messaging/registration-token-not-registered") {
-          await fcmDoc.ref.delete();
+          await tokenDoc.ref.delete();
         }
       }
     }
