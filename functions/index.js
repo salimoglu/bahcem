@@ -53,7 +53,7 @@ exports.sulamaKontrol = onSchedule(
           const next = base + days * 86400000;
           const diffDays = Math.round((next - Date.now()) / 86400000);
           if (diffDays <= 0) {
-            overdueAll.push({ name: p.nameTr || "Bitki", late: Math.abs(diffDays) });
+            overdueAll.push({ name: p.nameTr || "Bitki", late: Math.abs(diffDays), gardenName: g.name || "Bahçe" });
           }
         }
       }
@@ -62,14 +62,37 @@ exports.sulamaKontrol = onSchedule(
       if (overdueAll.length === 0) continue;
 
       const count = overdueAll.length;
-      const body = count === 1
-        ? (overdueAll[0].late === 0 ? `${overdueAll[0].name} bugün sulanmalı 💧` : `${overdueAll[0].name} ${overdueAll[0].late} gündür sulanmadı 💧`)
-        : `${overdueAll.slice(0,2).map(p=>p.name).join(", ")}${count>2?` +${count-2}`:""} sulama bekliyor 💧`;
+      // Bahçe bazında grupla
+      const byGarden = {};
+      for (const p of overdueAll) {
+        if (!byGarden[p.gardenName]) byGarden[p.gardenName] = [];
+        byGarden[p.gardenName].push(p);
+      }
+      const gardenNames = Object.keys(byGarden);
+      let title, body;
+      if (gardenNames.length === 1) {
+        const gName = gardenNames[0];
+        const plants = byGarden[gName];
+        title = `🌿 ${gName} — Sulama Zamanı`;
+        if (plants.length === 1) {
+          body = plants[0].late === 0
+            ? `${plants[0].name} bugün sulanmalı 💧`
+            : `${plants[0].name} ${plants[0].late} gündür sulanmadı 💧`;
+        } else {
+          const names = plants.slice(0,2).map(p=>p.name).join(", ");
+          const more  = plants.length > 2 ? ` +${plants.length-2} bitki` : "";
+          body = `${names}${more} sulama bekliyor 💧`;
+        }
+      } else {
+        title = "🌿 Bahçem — Sulama Zamanı";
+        const parts = gardenNames.map(g => `${g}: ${byGarden[g].length} bitki`);
+        body = parts.join(" • ") + " sulama bekliyor 💧";
+      }
 
       try {
         await fcm.send({
           token,
-          notification: { title: "🌿 Bahçem — Sulama Zamanı", body },
+          notification: { title, body },
           webpush: {
             notification: {
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
