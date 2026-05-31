@@ -139,30 +139,7 @@ function syncWaterDaysInputState() {
   if (!elOv || !elDays) return;
   elDays.disabled = !elOv.checked;
 }
-function updateNotifStatus() {
-  const statusEl = document.getElementById("notif-status-text");
-  const btnEl    = document.getElementById("btn-notif-toggle");
-  if (!statusEl || !btnEl) return;
-  if (!("Notification" in window)) {
-    statusEl.textContent = "❌ Bu tarayıcı bildirimleri desteklemiyor";
-    return;
-  }
-  if (Notification.permission === "granted") {
-    statusEl.textContent = "✅ Bildirimler açık — Her sabah 08:00'de kontrol edilir";
-    btnEl.style.display = "none";
-  } else if (Notification.permission === "denied") {
-    statusEl.textContent = "🚫 Bildirimler engellendi — Tarayıcı ayarlarından izin verin";
-    btnEl.style.display = "none";
-  } else {
-    statusEl.textContent = "🔔 Bildirimler kapalı";
-    btnEl.style.display = "inline-flex";
-    btnEl.textContent = "Bildirimleri Aç";
-    btnEl.onclick = async () => {
-      await requestNotifPermission();
-      updateNotifStatus();
-    };
-  }
-}
+// updateNotifStatus aşağıda tanımlandı
 
 function openSettingsModal() {
   const elOv2 = document.getElementById("pref-water-override"); if(elOv2) elOv2.checked = getPrefWaterOverride();
