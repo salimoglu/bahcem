@@ -146,6 +146,7 @@ function openSettingsModal() {
   const elD2 = document.getElementById("pref-water-days"); if(elD2) elD2.value = String(getPrefWaterDays());
   const elCp2 = document.getElementById("pref-compact"); if(elCp2) elCp2.checked = localStorage.getItem(PREF_COMPACT) === "1";
   syncWaterDaysInputState();
+  updateNotifStatus();
   document.getElementById("modal-settings").classList.add("show");
 }
 function closeSettingsModal() {
