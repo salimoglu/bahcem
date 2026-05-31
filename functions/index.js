@@ -73,8 +73,7 @@ exports.sulamaKontrol = onSchedule(
           webpush: {
             notification: { title, body,
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
-              requireInteraction: true,
-              tag: "bahcem-water"
+              requireInteraction: true
             },
             data: { url },
             fcmOptions: { link: url }
