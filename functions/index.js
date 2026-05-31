@@ -96,3 +96,4 @@ exports.sulamaKontrol = onSchedule(
     }
   }
 );
+// deploy trigger Sun May 31 14:29:39 UTC 2026
