@@ -1048,7 +1048,26 @@ async function registerSw() {
   if (!("serviceWorker" in navigator)) return;
   if (location.protocol !== "https:" && location.hostname !== "localhost") return;
   try {
-    await navigator.serviceWorker.register("sw.js");
+    const reg = await navigator.serviceWorker.register("sw.js");
+
+    // Güncelleme var mı kontrol et
+    reg.addEventListener("updatefound", () => {
+      const newSW = reg.installing;
+      if (!newSW) return;
+      newSW.addEventListener("statechange", () => {
+        if (newSW.state === "activated") {
+          // Yeni SW aktif oldu, sayfayı sessizce yenile
+          window.location.reload();
+        }
+      });
+    });
+
+    // Mevcut SW'yi kontrol et — arka planda güncelleme ara
+    if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      window.location.reload();
+    });
+
     // İzin zaten varsa token'ı yenile
     if (Notification.permission === "granted") {
       await saveFcmToken();
