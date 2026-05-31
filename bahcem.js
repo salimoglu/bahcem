@@ -1068,31 +1068,42 @@ async function saveFcmToken() {
 }
 
 function updateNotifStatus() {
-  const st      = document.getElementById("notif-status-text");
-  const btn     = document.getElementById("btn-notif-toggle");
-  const timeRow = document.getElementById("notif-time-row");
+  const st  = document.getElementById("notif-status-text");
+  const btn = document.getElementById("btn-notif-toggle");
   if (!st || !btn) return;
   if (!("Notification" in window)) {
-    st.textContent = "❌ Bu tarayıcı bildirimleri desteklemiyor";
+    st.textContent = "❌ Bu cihaz bildirimleri desteklemiyor";
     btn.style.display = "none";
-    if (timeRow) timeRow.style.display = "none";
     return;
   }
   if (Notification.permission === "granted") {
     st.textContent = "✅ Bildirimler açık";
-    btn.style.display = "none";
-    if (timeRow) timeRow.style.display = "flex";
-    // Kayıtlı saati yükle
-    loadNotifHour();
+    btn.textContent = "Bildirimleri Kapat";
+    btn.style.display = "inline-flex";
+    btn.className = "btn btn-ghost btn-sm";
+    btn.onclick = async () => {
+      // FCM token'ı sil → bildirim durur
+      if (currentUser) {
+        await db.collection("users").doc(currentUser.uid)
+          .collection("settings").doc("fcm").delete();
+      }
+      toast("Bildirimler kapatıldı. Tarayıcı iznini değiştirmek için site ayarlarını kullanın.");
+      updateNotifStatus();
+    };
   } else if (Notification.permission === "denied") {
-    st.textContent = "🚫 Engellendi — Tarayıcı ayarlarından izin verin";
-    btn.style.display = "none";
-    if (timeRow) timeRow.style.display = "none";
+    st.textContent = "🚫 Bildirimler engellendi";
+    btn.textContent = "Nasıl açılır?";
+    btn.style.display = "inline-flex";
+    btn.className = "btn btn-ghost btn-sm";
+    btn.onclick = () => {
+      toast("Adres çubuğundaki kilit ikonuna tıklayıp Bildirimler → İzin Ver seçin.");
+    };
   } else {
     st.textContent = "🔔 Bildirimler kapalı";
+    btn.textContent = "Bildirimleri Aç";
     btn.style.display = "inline-flex";
-    if (timeRow) timeRow.style.display = "none";
-    btn.onclick = async () => { await requestNotifPermission(); };
+    btn.className = "btn btn-primary btn-sm";
+    btn.onclick = async () => { await requestNotifPermission(); updateNotifStatus(); };
   }
 }
 
