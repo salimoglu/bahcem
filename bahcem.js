@@ -289,7 +289,7 @@ function renderGardens() {
     const notifHour = g.notifHour ?? 8;
     const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
     const hourOptions = hours.map(h =>
-      `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}</option>`
+      `<option value="${h}"${h===notifHour?" selected":""}>${String(h).padStart(2,"0")}:00</option>`
     ).join("");
     return `
     <div class="garden-card" data-gid="${escA(g.id)}" role="button" tabindex="0">
