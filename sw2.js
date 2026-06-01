@@ -1,4 +1,4 @@
-// v1780339924
+// v1780340380
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))).then(() => self.clients.claim()));
@@ -7,24 +7,26 @@ self.addEventListener('fetch', e => {
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
 self.addEventListener('push', e => {
-  let title = '🌿 Bahçem — Sulama Zamanı';
-  let body  = 'Sulama bekleyen bitkileriniz var!';
+  let title = '🌿 Bahçem';
+  let body  = 'Sulama zamanı!';
   let url   = 'https://salimoglu.github.io/bahcem/';
+  
   if (e.data) {
     try {
-      const d = e.data.json();
-      if (d.title) title = d.title;
-      if (d.body)  body  = d.body;
-      if (d.url)   url   = d.url;
-      // webpush notification içinden de oku
-      if (d.notification) {
-        if (d.notification.title) title = d.notification.title;
-        if (d.notification.body)  body  = d.notification.body;
-      }
+      const raw = e.data.text();
+      console.log('[SW] Push raw:', raw);
+      const d = JSON.parse(raw);
+      console.log('[SW] Push parsed:', JSON.stringify(d));
+      title = d.title || title;
+      body  = d.body  || body;
+      url   = d.url   || url;
     } catch(err) {
-      try { body = e.data.text(); } catch(e2) {}
+      console.log('[SW] Parse hatası:', err.message);
     }
+  } else {
+    console.log('[SW] e.data yok!');
   }
+
   e.waitUntil(self.registration.showNotification(title, {
     body,
     icon:  '/bahcem/icons/icon-192.png',
