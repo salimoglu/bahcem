@@ -1050,7 +1050,7 @@ async function registerSw() {
       if (!r.scope.includes("bahcem")) await r.unregister();
     }
     // Yeni SW'yi kaydet
-    const reg = await navigator.serviceWorker.register("/bahcem/sw.js", { updateViaCache: "none" });
+    const reg = await navigator.serviceWorker.register("/bahcem/sw2.js", { updateViaCache: "none" });
     // Hemen güncelle
     await reg.update();
     // Bekleyen veya yüklenen SW'yi hemen aktif et
