@@ -1092,8 +1092,13 @@ async function saveFcmToken() {
   try {
     const messaging = firebase.messaging();
     // sw2.js registration'ını kesin olarak al
+    // sw2.js'i kesin olarak bul
+    let swReg = null;
     const regs = await navigator.serviceWorker.getRegistrations();
-    const swReg = regs.find(r => r.scope.includes('bahcem')) || await navigator.serviceWorker.ready;
+    for (const r of regs) {
+      if (r.active && r.active.scriptURL.includes('sw2.js')) { swReg = r; break; }
+    }
+    if (!swReg) swReg = await navigator.serviceWorker.register('/bahcem/sw2.js', { updateViaCache: 'none' });
     const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg });
     if (token) {
       // Kullanıcı ayarlarına kaydet
