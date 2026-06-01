@@ -1108,44 +1108,43 @@ async function saveFcmToken() {
 }
 
 function updateNotifStatus() {
-  const st  = document.getElementById("notif-status-text");
-  const btn = document.getElementById("btn-notif-toggle");
-  if (!st || !btn) return;
+  const st   = document.getElementById("notif-status-text");
+  const wrap = document.getElementById("notif-toggle-wrap");
+  const chk  = document.getElementById("notif-toggle-check");
+  if (!st) return;
+
   if (!("Notification" in window)) {
     st.textContent = "❌ Bu cihaz bildirimleri desteklemiyor";
-    btn.style.display = "none";
+    if (wrap) wrap.style.display = "none";
     return;
   }
 
-  const isOn = localStorage.getItem("notif-disabled") !== "1"
-               && Notification.permission === "granted";
+  const isOn = Notification.permission === "granted"
+               && localStorage.getItem("notif-disabled") !== "1";
 
-  st.textContent    = isOn ? "✅ Bildirimler açık" : "🔔 Bildirimler kapalı";
-  btn.textContent   = isOn ? "Bildirimleri Kapat" : "Bildirimleri Aç";
-  btn.style.display = "inline-flex";
-  btn.className     = isOn ? "btn btn-ghost btn-sm" : "btn btn-primary btn-sm";
+  st.textContent = isOn ? "✅ Bildirimler açık" : "🔔 Bildirimler kapalı";
+  if (wrap) wrap.style.display = "block";
+  if (chk)  { chk.checked = isOn; chk.onchange = null; chk.onchange = handleNotifToggle; }
+}
 
-  btn.onclick = null;
-  btn.onclick = async () => {
-    if (isOn) {
-      // Kapat
-      if (currentUser) {
-        await db.collection("users").doc(currentUser.uid).collection("settings").doc("fcm").delete().catch(()=>{});
-        await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(()=>{});
-      }
-      localStorage.setItem("notif-disabled", "1");
-      toast("Bildirimler kapatıldı ✓");
-    } else {
-      // Aç
-      localStorage.removeItem("notif-disabled");
-      if (Notification.permission !== "granted") {
-        await requestNotifPermission();
-      }
-      await saveFcmToken();
-      toast("Bildirimler açıldı ✓");
+async function handleNotifToggle() {
+  const chk = document.getElementById("notif-toggle-check");
+  if (chk.checked) {
+    // Aç
+    localStorage.removeItem("notif-disabled");
+    if (Notification.permission !== "granted") await requestNotifPermission();
+    await saveFcmToken();
+    toast("Bildirimler açıldı ✓");
+  } else {
+    // Kapat
+    if (currentUser) {
+      await db.collection("users").doc(currentUser.uid).collection("settings").doc("fcm").delete().catch(()=>{});
+      await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(()=>{});
     }
-    updateNotifStatus();
-  };
+    localStorage.setItem("notif-disabled", "1");
+    toast("Bildirimler kapatıldı ✓");
+  }
+  updateNotifStatus();
 }
 
 async function loadNotifHour() {
