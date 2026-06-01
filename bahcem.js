@@ -1117,43 +1117,35 @@ function updateNotifStatus() {
     return;
   }
 
-  const notifDisabled = localStorage.getItem("notif-disabled") === "1";
+  const isOn = localStorage.getItem("notif-disabled") !== "1"
+               && Notification.permission === "granted";
 
-  if (Notification.permission === "granted" && !notifDisabled) {
-    st.textContent = "✅ Bildirimler açık";
-    btn.textContent = "Bildirimleri Kapat";
-    btn.style.display = "inline-flex";
-    btn.className = "btn btn-ghost btn-sm";
-    btn.onclick = async () => {
+  st.textContent    = isOn ? "✅ Bildirimler açık" : "🔔 Bildirimler kapalı";
+  btn.textContent   = isOn ? "Bildirimleri Kapat" : "Bildirimleri Aç";
+  btn.style.display = "inline-flex";
+  btn.className     = isOn ? "btn btn-ghost btn-sm" : "btn btn-primary btn-sm";
+
+  btn.onclick = null;
+  btn.onclick = async () => {
+    if (isOn) {
+      // Kapat
       if (currentUser) {
-        await db.collection("users").doc(currentUser.uid)
-          .collection("settings").doc("fcm").delete().catch(()=>{});
+        await db.collection("users").doc(currentUser.uid).collection("settings").doc("fcm").delete().catch(()=>{});
         await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(()=>{});
       }
       localStorage.setItem("notif-disabled", "1");
       toast("Bildirimler kapatıldı ✓");
-      updateNotifStatus();
-    };
-  } else if (Notification.permission === "denied") {
-    st.textContent = "🚫 Bildirimler engellendi";
-    btn.textContent = "Nasıl açılır?";
-    btn.style.display = "inline-flex";
-    btn.className = "btn btn-ghost btn-sm";
-    btn.onclick = () => {
-      toast("Adres çubuğundaki kilit ikonuna tıklayıp Bildirimler → İzin Ver seçin.");
-    };
-  } else {
-    st.textContent = "🔔 Bildirimler kapalı";
-    btn.textContent = "Bildirimleri Aç";
-    btn.style.display = "inline-flex";
-    btn.className = "btn btn-primary btn-sm";
-    btn.onclick = async () => {
+    } else {
+      // Aç
       localStorage.removeItem("notif-disabled");
-      await requestNotifPermission();
+      if (Notification.permission !== "granted") {
+        await requestNotifPermission();
+      }
       await saveFcmToken();
-      updateNotifStatus();
-    };
-  }
+      toast("Bildirimler açıldı ✓");
+    }
+    updateNotifStatus();
+  };
 }
 
 async function loadNotifHour() {
