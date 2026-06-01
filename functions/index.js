@@ -71,11 +71,7 @@ exports.sulamaKontrol = onSchedule(
         await fcm.send({
           token,
           webpush: {
-            notification: { title, body,
-              icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
-              requireInteraction: true
-            },
-            data: { url },
+            data: { title, body, url },
             fcmOptions: { link: url }
           }
         });
