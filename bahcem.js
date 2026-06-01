@@ -1091,7 +1091,9 @@ async function saveFcmToken() {
   if (!currentUser) return;
   try {
     const messaging = firebase.messaging();
-    const swReg = await navigator.serviceWorker.ready;
+    // sw2.js registration'ını kesin olarak al
+    const regs = await navigator.serviceWorker.getRegistrations();
+    const swReg = regs.find(r => r.scope.includes('bahcem')) || await navigator.serviceWorker.ready;
     const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg });
     if (token) {
       // Kullanıcı ayarlarına kaydet
