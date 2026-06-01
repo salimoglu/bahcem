@@ -1122,13 +1122,18 @@ function updateNotifStatus() {
     btn.style.display = "inline-flex";
     btn.className = "btn btn-ghost btn-sm";
     btn.onclick = async () => {
-      // FCM token'ı sil → bildirim durur
       if (currentUser) {
+        // Her iki koleksiyondan da sil
         await db.collection("users").doc(currentUser.uid)
-          .collection("settings").doc("fcm").delete();
+          .collection("settings").doc("fcm").delete().catch(()=>{});
+        await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(()=>{});
       }
-      toast("Bildirimler kapatıldı. Tarayıcı iznini değiştirmek için site ayarlarını kullanın.");
-      updateNotifStatus();
+      toast("Bildirimler kapatıldı ✓");
+      // Butonu hemen "Bildirimleri Aç" yap
+      st.textContent = "🔔 Bildirimler kapalı";
+      btn.textContent = "Bildirimleri Aç";
+      btn.className = "btn btn-primary btn-sm";
+      btn.onclick = async () => { await requestNotifPermission(); await saveFcmToken(); updateNotifStatus(); };
     };
   } else if (Notification.permission === "denied") {
     st.textContent = "🚫 Bildirimler engellendi";
