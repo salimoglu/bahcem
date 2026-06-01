@@ -70,9 +70,21 @@ exports.sulamaKontrol = onSchedule(
       try {
         await fcm.send({
           token,
-          data: { title, body, url },
+          notification: { title, body },
+          data: { url },
+          android: {
+            notification: {
+              title, body,
+              icon: "ic_notification",
+              clickAction: "FLUTTER_NOTIFICATION_CLICK"
+            }
+          },
           webpush: {
-            headers: { Urgency: "high" },
+            notification: { title, body,
+              icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
+              requireInteraction: true
+            },
+            data: { url },
             fcmOptions: { link: url }
           }
         });
