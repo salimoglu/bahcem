@@ -1116,24 +1116,23 @@ function updateNotifStatus() {
     btn.style.display = "none";
     return;
   }
-  if (Notification.permission === "granted") {
+
+  const notifDisabled = localStorage.getItem("notif-disabled") === "1";
+
+  if (Notification.permission === "granted" && !notifDisabled) {
     st.textContent = "✅ Bildirimler açık";
     btn.textContent = "Bildirimleri Kapat";
     btn.style.display = "inline-flex";
     btn.className = "btn btn-ghost btn-sm";
     btn.onclick = async () => {
       if (currentUser) {
-        // Her iki koleksiyondan da sil
         await db.collection("users").doc(currentUser.uid)
           .collection("settings").doc("fcm").delete().catch(()=>{});
         await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(()=>{});
       }
+      localStorage.setItem("notif-disabled", "1");
       toast("Bildirimler kapatıldı ✓");
-      // Butonu hemen "Bildirimleri Aç" yap
-      st.textContent = "🔔 Bildirimler kapalı";
-      btn.textContent = "Bildirimleri Aç";
-      btn.className = "btn btn-primary btn-sm";
-      btn.onclick = async () => { await requestNotifPermission(); await saveFcmToken(); updateNotifStatus(); };
+      updateNotifStatus();
     };
   } else if (Notification.permission === "denied") {
     st.textContent = "🚫 Bildirimler engellendi";
@@ -1148,7 +1147,12 @@ function updateNotifStatus() {
     btn.textContent = "Bildirimleri Aç";
     btn.style.display = "inline-flex";
     btn.className = "btn btn-primary btn-sm";
-    btn.onclick = async () => { await requestNotifPermission(); updateNotifStatus(); };
+    btn.onclick = async () => {
+      localStorage.removeItem("notif-disabled");
+      await requestNotifPermission();
+      await saveFcmToken();
+      updateNotifStatus();
+    };
   }
 }
 
