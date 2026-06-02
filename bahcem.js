@@ -149,9 +149,10 @@ function openSettingsModal() {
   syncWaterDaysInputState();
   updateNotifStatus();
   document.getElementById("modal-settings").classList.add("show");
+  openOverlay("modal-settings");
 }
 function closeSettingsModal() {
-  document.getElementById("modal-settings").classList.remove("show");
+  closeOverlay("modal-settings", true);
 }
 function saveSettingsFromModal() {
   const pwEl = document.getElementById("pref-water-days");
@@ -234,15 +235,37 @@ function isAppVisible() {
   return currentUser && app && app.style.display !== "none";
 }
 
-function closeAnyOpenModal() {
-  for (const id of MODAL_IDS) {
-    const el = document.getElementById(id);
-    if (el && el.classList.contains("show")) {
-      el.classList.remove("show");
-      return true;
-    }
+function getOpenModalId() {
+  for (let i = MODAL_IDS.length - 1; i >= 0; i--) {
+    const el = document.getElementById(MODAL_IDS[i]);
+    if (el && el.classList.contains("show")) return MODAL_IDS[i];
   }
-  return false;
+  return null;
+}
+
+function openOverlay(modalId) {
+  if (history.state?.bahcem === "modal" && history.state?.modalId === modalId) return;
+  history.pushState({ bahcem: "modal", modalId }, "", location.href);
+}
+
+function closeOverlay(modalId, syncHistory) {
+  if (syncHistory && history.state?.bahcem === "modal" && history.state?.modalId === modalId) {
+    history.back();
+    return;
+  }
+  const el = document.getElementById(modalId);
+  if (el) el.classList.remove("show");
+}
+
+function closeTopOverlay(fromPopState) {
+  const id = getOpenModalId();
+  if (!id) return false;
+  if (fromPopState) {
+    document.getElementById(id)?.classList.remove("show");
+  } else {
+    closeOverlay(id, true);
+  }
+  return true;
 }
 
 function initAppHistory() {
@@ -260,10 +283,7 @@ function goBackToGardensList() {
 function handlePopStateBack() {
   if (!isAppVisible()) return;
 
-  if (closeAnyOpenModal()) {
-    history.pushState(history.state || { bahcem: "gardens" }, "", location.href);
-    return;
-  }
+  if (closeTopOverlay(true)) return;
 
   if (getActiveScreenId() === "screen-plants") {
     goBackToGardensList();
@@ -284,7 +304,7 @@ function handlePopStateBack() {
 function performBack() {
   if (!isAppVisible()) return;
 
-  if (closeAnyOpenModal()) return;
+  if (closeTopOverlay(false)) return;
 
   if (getActiveScreenId() === "screen-plants") {
     goBackToGardensList();
@@ -303,13 +323,12 @@ function performBack() {
 }
 
 function setupEdgeSwipeBack() {
-  const root = document.getElementById("app-screen");
-  if (!root || root._swipeBack) return;
-  root._swipeBack = true;
+  if (document.body._swipeBack) return;
+  document.body._swipeBack = true;
 
   let startX = 0, startY = 0, edge = null;
 
-  root.addEventListener("touchstart", e => {
+  document.body.addEventListener("touchstart", e => {
     if (e.touches.length !== 1) return;
     const x = e.touches[0].clientX;
     const w = window.innerWidth;
@@ -320,16 +339,17 @@ function setupEdgeSwipeBack() {
     startY = e.touches[0].clientY;
   }, { passive: true });
 
-  root.addEventListener("touchend", e => {
+  document.body.addEventListener("touchend", e => {
     if (!edge) return;
+    const swipeEdge = edge;
     const t = e.changedTouches[0];
     const dx = t.clientX - startX;
     const dy = t.clientY - startY;
     edge = null;
     if (Math.abs(dx) < SWIPE_MIN_PX) return;
     if (Math.abs(dy) > Math.abs(dx)) return;
-    if (edge === "left" && dx > 0) performBack();
-    else if (edge === "right" && dx < 0) performBack();
+    if (swipeEdge === "left" && dx > 0) performBack();
+    else if (swipeEdge === "right" && dx < 0) performBack();
   }, { passive: true });
 }
 
@@ -532,9 +552,10 @@ function openGardenModal(mode) {
   }
 
   document.getElementById("modal-garden").classList.add("show");
+  openOverlay("modal-garden");
   setTimeout(() => inp.focus(), 100);
 }
-function closeGardenModal() { document.getElementById("modal-garden").classList.remove("show"); }
+function closeGardenModal() { closeOverlay("modal-garden", true); }
 async function saveGarden() {
   const inp = document.getElementById("field-garden-name");
   let name = inp.value.trim();
@@ -747,8 +768,7 @@ function openPlantDetail(pid) {
     detInterval = Math.min(90, detInterval + 1);
     document.getElementById("det-interval-val").textContent = detInterval;
   };
-  document.getElementById("btn-det-close").onclick = () =>
-    document.getElementById("modal-plant-detail").classList.remove("show");
+  document.getElementById("btn-det-close").onclick = () => closeOverlay("modal-plant-detail", true);
   document.getElementById("btn-det-water").onclick = async () => {
     const now = new Date().toISOString();
     const history = [...(p.wateringHistory||[]), now];
@@ -765,9 +785,10 @@ function openPlantDetail(pid) {
   document.getElementById("btn-det-del").onclick = async () => {
     if (!confirm("Bu bitkiyi silmek istiyor musunuz?")) return;
     await plantsCol(currentGardenId).doc(pid).delete();
-    document.getElementById("modal-plant-detail").classList.remove("show"); toast("Silindi");
+    closeOverlay("modal-plant-detail", true); toast("Silindi");
   };
   document.getElementById("modal-plant-detail").classList.add("show");
+  openOverlay("modal-plant-detail");
 }
 
 // ─── BİTKİ EKLEME ───
@@ -779,9 +800,10 @@ function openAddPlant() {
   renderCatalog("", "all");
   updateSelectionBar();
   document.getElementById("modal-add-plant").classList.add("show");
+  openOverlay("modal-add-plant");
   setTimeout(() => { if (searchEl) searchEl.focus(); }, 120);
 }
-function closeAddPlant() { document.getElementById("modal-add-plant").classList.remove("show"); }
+function closeAddPlant() { closeOverlay("modal-add-plant", true); }
 
 // Aktif kategori
 let activeCat = "all";
@@ -893,7 +915,7 @@ function showPlantPreview(dbPlant) {
   `;
 
   // Buton olayları
-  document.getElementById("preview-close-btn").onclick = () => m.classList.remove("show");
+  document.getElementById("preview-close-btn").onclick = () => closeOverlay("modal-plant-preview", true);
   const selBtn = document.getElementById("preview-sel-btn");
   if (selBtn) selBtn.onclick = () => {
     selectedPlants.set(dbPlant.id, { dbPlant, interval: intervalForNewPlant(dbPlant), imageUrl: "" });
@@ -901,17 +923,18 @@ function showPlantPreview(dbPlant) {
       if (selectedPlants.has(dbPlant.id)) selectedPlants.get(dbPlant.id).imageUrl = url;
     }).catch(()=>{});
     updateSelectionBar(); renderCatalog();
-    m.classList.remove("show");
+    closeOverlay("modal-plant-preview", true);
     toast(`${dbPlant.nameTr} seçildi`);
   };
   const deselBtn = document.getElementById("preview-desel-btn");
   if (deselBtn) deselBtn.onclick = () => {
     selectedPlants.delete(dbPlant.id);
     updateSelectionBar(); renderCatalog();
-    m.classList.remove("show");
+    closeOverlay("modal-plant-preview", true);
   };
 
   m.classList.add("show");
+  openOverlay("modal-plant-preview");
 
   // Wikipedia'dan Türkçe özet çek (önce TR, olmadı EN)
   fetchWikiPreview(dbPlant).then(wiki => {
@@ -1178,13 +1201,11 @@ function wireOnce() {
 
   // Önizleme modalı kapat (backdrop tık)
   (document.getElementById("modal-plant-preview")||{addEventListener:()=>{}}).addEventListener("click", e => {
-    if (e.target.id === "modal-plant-preview") document.getElementById("modal-plant-preview").classList.remove("show");
+    if (e.target.id === "modal-plant-preview") closeOverlay("modal-plant-preview", true);
   });
 
-  // Detay kapat
-
   (document.getElementById("modal-plant-detail")||{addEventListener:()=>{}}).addEventListener("click", e => {
-    if(e.target.id==="modal-plant-detail") document.getElementById("modal-plant-detail").classList.remove("show");
+    if (e.target.id === "modal-plant-detail") closeOverlay("modal-plant-detail", true);
   });
 
   (document.getElementById("btn-settings")||{addEventListener:()=>{}}).addEventListener("click", openSettingsModal);
