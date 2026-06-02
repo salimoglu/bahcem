@@ -1,4 +1,4 @@
-// v1780340380
+// v1780340381 — FCM payload ayrıştırma
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))).then(() => self.clients.claim()));
@@ -6,26 +6,31 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
-self.addEventListener('push', e => {
-  let title = '🌿 Bahçem';
-  let body  = 'Sulama zamanı!';
-  let url   = 'https://salimoglu.github.io/bahcem/';
-  
-  if (e.data) {
-    try {
-      const raw = e.data.text();
-      console.log('[SW] Push raw:', raw);
-      const d = JSON.parse(raw);
-      console.log('[SW] Push parsed:', JSON.stringify(d));
-      title = d.title || title;
-      body  = d.body  || body;
-      url   = d.url   || url;
-    } catch(err) {
-      console.log('[SW] Parse hatası:', err.message);
-    }
-  } else {
-    console.log('[SW] e.data yok!');
+
+function parsePushPayload(e) {
+  const fallback = {
+    title: '🌿 Bahçem',
+    body:  'Sulama zamanı!',
+    url:   'https://salimoglu.github.io/bahcem/'
+  };
+  if (!e.data) return fallback;
+  try {
+    const d = JSON.parse(e.data.text());
+    const notif = d.notification || d.gcm?.notification || {};
+    const data  = d.data || {};
+    return {
+      title: notif.title || data.title || d.title || fallback.title,
+      body:  notif.body  || data.body  || d.body  || fallback.body,
+      url:   data.url || d.url || d.fcmOptions?.link || fallback.url
+    };
+  } catch (err) {
+    console.log('[SW] Parse hatası:', err.message);
+    return fallback;
   }
+}
+
+self.addEventListener('push', e => {
+  const { title, body, url } = parsePushPayload(e);
 
   e.waitUntil(self.registration.showNotification(title, {
     body,

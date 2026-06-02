@@ -13,9 +13,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(payload => {
-  const title = payload.data?.title || payload.notification?.title || '🌿 Bahçem';
-  const body  = payload.data?.body  || payload.notification?.body  || 'Sulama zamanı!';
-  const url   = payload.data?.url   || 'https://salimoglu.github.io/bahcem/';
+  const notif = payload.notification || {};
+  const data  = payload.data || {};
+  const title = data.title || notif.title || '🌿 Bahçem';
+  const body  = data.body  || notif.body  || 'Sulama zamanı!';
+  const url   = data.url   || 'https://salimoglu.github.io/bahcem/';
 
   return self.registration.showNotification(title, {
     body,

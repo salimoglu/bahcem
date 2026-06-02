@@ -7,6 +7,41 @@ initializeApp();
 const db  = getFirestore();
 const fcm = getMessaging();
 
+const APP_URL = "https://salimoglu.github.io/bahcem/";
+const MAX_BODY_LEN = 280;
+
+/** Bahçe → bitki adları listesinden bildirim metni üretir */
+function formatNotifBody(byGarden) {
+  const parts = [];
+  let len = 0;
+  const gardenNames = Object.keys(byGarden);
+
+  for (let i = 0; i < gardenNames.length; i++) {
+    const gName = gardenNames[i];
+    const names = byGarden[gName];
+    let segment;
+
+    if (names.length === 1) {
+      segment = `${gName}: ${names[0]}`;
+    } else if (names.length <= 4) {
+      segment = `${gName}: ${names.join(", ")}`;
+    } else {
+      segment = `${gName} (${names.length} bitki): ${names.slice(0, 3).join(", ")} +${names.length - 3}`;
+    }
+
+    const sep = parts.length ? " · " : "";
+    if (len + sep.length + segment.length > MAX_BODY_LEN) {
+      const left = gardenNames.length - i;
+      if (left > 0) parts.push(`+${left} bahçe daha`);
+      break;
+    }
+    parts.push(segment);
+    len += sep.length + segment.length;
+  }
+
+  return parts.join(" · ") + " 💧";
+}
+
 exports.sulamaKontrol = onSchedule(
   { schedule: "0 * * * *", timeZone: "Europe/Istanbul", region: "europe-west1" },
   async () => {
@@ -46,32 +81,24 @@ exports.sulamaKontrol = onSchedule(
 
       if (!overdue.length) { console.log(`${uid}: sulanmamış bitki yok`); continue; }
 
-      // Bahçe bazında grupla
       const byGarden = {};
       for (const p of overdue) {
         if (!byGarden[p.gardenName]) byGarden[p.gardenName] = [];
         byGarden[p.gardenName].push(p.name);
       }
-      const gardens = Object.keys(byGarden);
-      const title = "🌿 Bahçem — Sulama Zamanı";
-      let body, url;
 
-      if (gardens.length === 1) {
-        const gName = gardens[0];
-        const names = byGarden[gName];
-        const preview = names.slice(0,2).join(", ") + (names.length > 2 ? ` +${names.length-2}` : "");
-        body = `${gName}: ${preview} sulama bekliyor 💧`;
-        url  = `https://salimoglu.github.io/bahcem/?garden=${overdue[0].gardenId}`;
-      } else {
-        body = gardens.map(g => `${g}: ${byGarden[g].length} bitki`).join(" • ") + " 💧";
-        url  = "https://salimoglu.github.io/bahcem/";
-      }
+      const title = "🌿 Bahçem — Sulama Zamanı";
+      const body  = formatNotifBody(byGarden);
+      const gardenIds = [...new Set(overdue.map(p => p.gardenId))];
+      const url = gardenIds.length === 1
+        ? `${APP_URL}?garden=${gardenIds[0]}`
+        : APP_URL;
 
       try {
         await fcm.send({
           token,
           notification: { title, body },
-          data: { url },
+          data: { title, body, url },
           android: {
             notification: {
               title, body,
@@ -84,7 +111,7 @@ exports.sulamaKontrol = onSchedule(
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
               requireInteraction: true
             },
-            data: { url },
+            data: { url, title, body },
             fcmOptions: { link: url }
           }
         });
