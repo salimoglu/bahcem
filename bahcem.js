@@ -1010,11 +1010,39 @@ function renderCatalog(query, cat) {
   }
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
     const dbPlant = PLANTS_DB[Number(btn.dataset.idx)];
-    attachLongPress(btn, {
-      holdClass: "catalog-btn-holding",
-      onLongPress: () => showPlantPreview(dbPlant),
-      onTap: () => togglePlantSelect(dbPlant, btn)
+    let pressTimer = null;
+    let longPressFired = false;
+
+    btn.addEventListener("click", e => {
+      if (longPressFired) {
+        longPressFired = false;
+        e.preventDefault();
+        return;
+      }
+      togglePlantSelect(dbPlant, btn);
     });
+
+    btn.addEventListener("pointerdown", () => {
+      longPressFired = false;
+      btn.classList.add("catalog-btn-holding");
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        longPressFired = true;
+        btn.classList.remove("catalog-btn-holding");
+        clearTextSelection();
+        showPlantPreview(dbPlant);
+      }, LONG_PRESS_MS);
+    });
+
+    const cancelPress = () => {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      btn.classList.remove("catalog-btn-holding");
+    };
+
+    btn.addEventListener("pointerup", cancelPress);
+    btn.addEventListener("pointerleave", cancelPress);
+    btn.addEventListener("pointercancel", cancelPress);
+    btn.addEventListener("selectstart", e => e.preventDefault());
     btn.addEventListener("contextmenu", e => {
       e.preventDefault();
       clearTextSelection();
@@ -1161,30 +1189,21 @@ async function fetchWikiPreview(dbPlant) {
 
 // Seç / kaldır
 function togglePlantSelect(dbPlant, btn) {
-  // Zaten bahçede varsa seçme
-  if (btn.classList.contains("already-added")) {
+  if (plants.some(p => (p.nameTr || "").toLocaleLowerCase("tr") === dbPlant.nameTr.toLocaleLowerCase("tr"))) {
     toast(`${dbPlant.nameTr} zaten bu bahçede ekli`);
     return;
   }
   if (selectedPlants.has(dbPlant.id)) {
     selectedPlants.delete(dbPlant.id);
-    btn.classList.remove("selected");
-    btn.querySelector(".sel-check")?.remove();
   } else {
     selectedPlants.set(dbPlant.id, { dbPlant, interval: intervalForNewPlant(dbPlant), imageUrl: "" });
-    btn.classList.add("selected");
-    if (!btn.querySelector(".sel-check")) {
-      const chk = document.createElement("span");
-      chk.className = "sel-check"; chk.textContent = "✓";
-      btn.prepend(chk);
-    }
-    // Arka planda görsel çek
     fetchWikimediaImage(dbPlant.nameLat || dbPlant.nameTr).then(url => {
       if (selectedPlants.has(dbPlant.id)) {
         selectedPlants.get(dbPlant.id).imageUrl = url;
       }
-    }).catch(()=>{});
+    }).catch(() => {});
   }
+  renderCatalog();
   updateSelectionBar();
 }
 

@@ -10,14 +10,12 @@ const fcm = getMessaging();
 const APP_URL = "https://salimoglu.github.io/bahcem/";
 const MAX_BODY_LEN = 280;
 
-/** Uygulamadaki waterStatus + needWater ile aynı mantık (key !== "ok") */
+/** Sulama zamanı gelmiş bitkiler (gecikmiş veya bugün — yarın dahil değil) */
 function plantNeedsWater(p) {
   const days = Math.max(1, Number(p.wateringIntervalDays) || 7);
   if (!p.lastWateredAt) return true;
   const base = new Date(p.lastWateredAt).getTime();
-  const next = base + days * 86400000;
-  const diff = Math.round((next - Date.now()) / 86400000);
-  return diff <= 1; // gecikti, bugün veya yarın
+  return Date.now() >= base + days * 86400000;
 }
 
 function formatNotifBody(byGarden) {
