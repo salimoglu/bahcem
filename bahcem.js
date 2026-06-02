@@ -1217,16 +1217,26 @@ function wireOnce() {
 // ─── FCM BİLDİRİMLER ───
 const FCM_VAPID_KEY = "BJkthDNlxjQzoiiX_b5-aevw9u7mFjqk6VOdIBTq5RfrD9IbH6cuWTJ6KjPnEkQljN0qqdu5Q-8HG7c9Vy9RMnM";
 
+function swScriptUrl(reg) {
+  return reg.active?.scriptURL || reg.waiting?.scriptURL || reg.installing?.scriptURL || "";
+}
+
+async function ensureSw2Registration() {
+  const regs = await navigator.serviceWorker.getRegistrations();
+  for (const r of regs) {
+    const url = swScriptUrl(r);
+    if (url.includes("bahcem") && !url.includes("sw2.js")) await r.unregister();
+  }
+  for (const r of await navigator.serviceWorker.getRegistrations()) {
+    if (swScriptUrl(r).includes("sw2.js")) return r;
+  }
+  return navigator.serviceWorker.register("/bahcem/sw2.js", { updateViaCache: "none" });
+}
+
 async function registerSw() {
   if (!("serviceWorker" in navigator)) return;
   try {
-    // Önce tüm eski SW kayıtlarını sil
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (const r of regs) {
-      if (!r.scope.includes("bahcem")) await r.unregister();
-    }
-    // Yeni SW'yi kaydet
-    const reg = await navigator.serviceWorker.register("/bahcem/sw2.js", { updateViaCache: "none" });
+    const reg = await ensureSw2Registration();
     // Hemen güncelle
     await reg.update();
     // Bekleyen veya yüklenen SW'yi hemen aktif et
@@ -1267,14 +1277,7 @@ async function saveFcmToken() {
   if (!currentUser) return;
   try {
     const messaging = firebase.messaging();
-    // sw2.js registration'ını kesin olarak al
-    // sw2.js'i kesin olarak bul
-    let swReg = null;
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (const r of regs) {
-      if (r.active && r.active.scriptURL.includes('sw2.js')) { swReg = r; break; }
-    }
-    if (!swReg) swReg = await navigator.serviceWorker.register('/bahcem/sw2.js', { updateViaCache: 'none' });
+    const swReg = await ensureSw2Registration();
     const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg });
     if (token) {
       // Kullanıcı ayarlarına kaydet
