@@ -31,18 +31,16 @@ function openGardenIconPicker(gid, currentIcon) {
     </div>
   `;
 
-  picker.querySelectorAll && setTimeout(() => {
-    picker.querySelectorAll(".gip-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const emoji = btn.dataset.emoji;
-        try {
-          await gardensCol().doc(gid).update({ icon: emoji });
-          toast("Simge güncellendi");
-        } catch(e) { toast("Hata: " + e.message); }
-        picker.remove();
-      });
+  picker.querySelectorAll(".gip-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const emoji = btn.dataset.emoji;
+      try {
+        await gardensCol().doc(gid).update({ icon: emoji });
+        toast("Simge güncellendi");
+      } catch(e) { toast("Hata: " + e.message); }
+      picker.remove();
     });
-  }, 0);
+  });
 
   document.body.appendChild(picker);
 
@@ -90,9 +88,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
-
-// Formspree: https://formspree.io — yeni form oluşturup “form endpoint” ID’sini buraya yazın (örn. xvgw…).
-const FORMSPREE_FORM_ID = ""; // Formspree ID buraya gelecek
 
 const PREF_WATER_OVERRIDE = "bahcem-pref-water-override";
 const PREF_WATER_DAYS = "bahcem-pref-water-days";
@@ -166,9 +161,6 @@ function saveSettingsFromModal() {
   closeSettingsModal();
   toast("Ayarlar kaydedildi ✓");
 }
-function closeFeedbackModal() {
-  // artık bağımsız modal yok — ayarlar içinde
-}
 
 async function submitFeedback(ev) {
   if (ev) ev.preventDefault();
@@ -223,7 +215,7 @@ let lastExitPress = 0;
 let historyNavReady = false;
 const EDGE_SWIPE_PX = 32;
 const SWIPE_MIN_PX  = 70;
-const MODAL_IDS = ["modal-garden","modal-add-plant","modal-plant-detail","modal-plant-preview","modal-settings","modal-feedback"];
+const MODAL_IDS = ["modal-garden","modal-add-plant","modal-plant-detail","modal-plant-preview","modal-settings"];
 
 function getActiveScreenId() {
   const el = document.querySelector(".screen.active");
@@ -279,9 +271,19 @@ function goBackToGardensList() {
   showScreen("screen-gardens");
 }
 
+function closeGardenIconPicker() {
+  document.getElementById("garden-icon-picker")?.remove();
+}
+
 /** Sistem geri / popstate (tarayıcı zaten bir adım geri gitti) */
 function handlePopStateBack() {
   if (!isAppVisible()) return;
+
+  if (document.getElementById("garden-icon-picker")) {
+    closeGardenIconPicker();
+    history.pushState(history.state || { bahcem: "gardens" }, "", location.href);
+    return;
+  }
 
   if (closeTopOverlay(true)) return;
 
@@ -303,6 +305,11 @@ function handlePopStateBack() {
 /** Ekran içi geri butonu ve kenar kaydırma */
 function performBack() {
   if (!isAppVisible()) return;
+
+  if (document.getElementById("garden-icon-picker")) {
+    closeGardenIconPicker();
+    return;
+  }
 
   if (closeTopOverlay(false)) return;
 
@@ -439,7 +446,7 @@ function renderGardens() {
     ).join("");
     return `
     <div class="garden-card" data-gid="${escA(g.id)}" role="button" tabindex="0">
-      <div class="garden-card-icon">${esc(g.icon||"🌿")}</div>
+      <button type="button" class="garden-card-icon garden-card-icon-btn" data-gid="${escA(g.id)}" title="Simge değiştir" aria-label="Bahçe simgesi">${esc(g.icon||"🌿")}</button>
       <div class="garden-card-body">
         <h3>${esc(g.name)}</h3>
         <div class="garden-card-stats">
@@ -468,6 +475,14 @@ function renderGardens() {
   list.querySelectorAll(".garden-card").forEach(c => {
     c.addEventListener("click", () => openGarden(c.dataset.gid));
     c.addEventListener("keydown", e => { if (e.key==="Enter"||e.key===" ") openGarden(c.dataset.gid); });
+  });
+
+  list.querySelectorAll(".garden-card-icon-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const g = gardens.find(x => x.id === btn.dataset.gid);
+      openGardenIconPicker(btn.dataset.gid, g?.icon || "🌿");
+    });
   });
 
   // Bildirim toggle
@@ -740,23 +755,6 @@ function openPlantDetail(pid) {
       <button type="button" class="det-btn det-btn-del"    id="btn-det-del">🗑<span>Sil</span></button>
       <button type="button" class="det-btn det-btn-close"  id="btn-det-close">✕<span>Kapat</span></button>
     </div>
-    ${(p.wateringHistory&&p.wateringHistory.length) ? `
-    <div class="water-history">
-      <div class="water-history-title">💧 Sulama Geçmişi</div>
-      <div class="water-history-list">
-        ${[...p.wateringHistory].reverse().slice(0,10).map((iso,i) => {
-          const d = new Date(iso);
-          const dateStr = d.toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"});
-          const timeStr = d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
-          return `<div class="water-history-row ${i===0?"wh-latest":""}">
-            <span class="wh-dot"></span>
-            <span class="wh-date">${dateStr}</span>
-            <span class="wh-time">${timeStr}</span>
-          </div>`;
-        }).join("")}
-        ${p.wateringHistory.length > 10 ? `<div class="wh-more">+ ${p.wateringHistory.length-10} daha…</div>` : ""}
-      </div>
-    </div>` : ""}
   `;
 
   let detInterval = p.wateringIntervalDays || 7;
@@ -1195,9 +1193,8 @@ function wireOnce() {
   // Kaydet
   (document.getElementById("btn-save-plant")||{addEventListener:()=>{}}).addEventListener("click", savePlant);
 
-  // Bildirim saati değişince kaydet
-  const hourSel = document.getElementById("notif-hour-select");
-  if (hourSel) hourSel.addEventListener("change", e => saveNotifHour(e.target.value));
+  const prefWaterOv = document.getElementById("pref-water-override");
+  if (prefWaterOv) prefWaterOv.addEventListener("change", syncWaterDaysInputState);
 
   // Önizleme modalı kapat (backdrop tık)
   (document.getElementById("modal-plant-preview")||{addEventListener:()=>{}}).addEventListener("click", e => {
@@ -1329,25 +1326,4 @@ async function handleNotifToggle() {
     toast("Bildirimler kapatıldı ✓");
   }
   updateNotifStatus();
-}
-
-async function loadNotifHour() {
-  if (!currentUser) return;
-  try {
-    const doc = await db.collection("users").doc(currentUser.uid)
-      .collection("settings").doc("notifications").get();
-    const hour = doc.exists ? (doc.data().hour ?? 8) : 8;
-    const sel = document.getElementById("notif-hour-select");
-    if (sel) sel.value = String(hour);
-  } catch(e) {}
-}
-
-async function saveNotifHour(hour) {
-  if (!currentUser) return;
-  try {
-    await db.collection("users").doc(currentUser.uid)
-      .collection("settings").doc("notifications")
-      .set({ hour: Number(hour) }, { merge: true });
-    toast(`Bildirim saati ${String(hour).padStart(2,"0")}:00 olarak ayarlandı ✓`);
-  } catch(e) { toast("Kayıt hatası: " + e.message); }
 }

@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"/>
-  <link rel="stylesheet" href="bahcem.css?v=1780342100"/>
+  <link rel="stylesheet" href="bahcem.css?v=1780342300"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -89,11 +89,10 @@
           <div class="garden-title-wrap">
             <h2 id="garden-title-display" class="garden-title-text"></h2>
             <button type="button" id="btn-add-plant" class="btn btn-primary btn-sm">+ Bitki ekle</button>
-          <button type="button" id="btn-rename-garden" class="btn-icon" title="Adı değiştir">
+            <button type="button" id="btn-rename-garden" class="btn-icon" title="Adı değiştir">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
           </div>
-
         </div>
         <div id="plants-empty" class="empty hidden">
           <div class="empty-icon">🪴</div>
@@ -213,34 +212,13 @@
       <h2>Ayarlar</h2>
       <div class="settings-block">
         <h3 class="settings-heading">Sulama Bildirimleri</h3>
-        <p class="settings-hint">Seçtiğiniz saatte sulanması gereken bitkiler için bildirim gelir. Uygulama kapalı olsa bile çalışır.</p>
+        <p class="settings-hint">Bildirim iznini açın; saat ve aç/kapa ayarını her bahçe kartından yapabilirsiniz.</p>
         <div class="settings-notif-row">
           <div id="notif-status-text" class="settings-notif-status">⏳ Kontrol ediliyor…</div>
           <label class="notif-toggle-wrap" id="notif-toggle-wrap" style="display:none">
             <input type="checkbox" id="notif-toggle-check" class="notif-toggle-input"/>
             <span class="notif-toggle-slider"></span>
           </label>
-        </div>
-        <div class="settings-notif-time-row" id="notif-time-row" style="display:none">
-          <label for="notif-hour-select">Bildirim saati</label>
-          <select id="notif-hour-select" class="notif-hour-select">
-            <option value="6">06:00</option>
-            <option value="7">07:00</option>
-            <option value="8" selected>08:00</option>
-            <option value="9">09:00</option>
-            <option value="10">10:00</option>
-            <option value="11">11:00</option>
-            <option value="12">12:00</option>
-            <option value="13">13:00</option>
-            <option value="14">14:00</option>
-            <option value="15">15:00</option>
-            <option value="16">16:00</option>
-            <option value="17">17:00</option>
-            <option value="18">18:00</option>
-            <option value="19">19:00</option>
-            <option value="20">20:00</option>
-            <option value="21">21:00</option>
-          </select>
         </div>
       </div>
       <div class="settings-block">
@@ -256,7 +234,14 @@
           Daha kompakt liste görünümü
         </label>
       </div>
-
+      <div class="settings-block">
+        <h3 class="settings-heading">Yeni bitkiler</h3>
+        <label class="settings-check">
+          <input type="checkbox" id="pref-water-override"/>
+          Her zaman şu sulama aralığını kullan (gün):
+        </label>
+        <input type="number" id="pref-water-days" class="settings-num" min="1" max="90" value="7" inputmode="numeric"/>
+      </div>
       <div class="settings-block">
         <h3 class="settings-heading">Hakkında</h3>
         <p class="settings-about">Bahçem — bitki ve sulama takibi. Kaynak kodu: <a href="https://github.com/salimoglu/bahcem" target="_blank" rel="noopener">GitHub</a></p>
@@ -285,9 +270,8 @@
       </div>
     </div>
   </div>
-        <div class="field">
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="bahcem.js?v=1780342200" defer></script>
+  <script src="bahcem.js?v=1780342300" defer></script>
 </body>
 </html>

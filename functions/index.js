@@ -58,13 +58,11 @@ exports.sulamaKontrol = onSchedule(
 
       const gardensSnap = await db.collection("users").doc(uid).collection("gardens").get();
       const overdue = [];
-      let targetGardenId = null;
 
       for (const gDoc of gardensSnap.docs) {
         const g = gDoc.data();
         if (!g.notifOn) continue;
         if ((g.notifHour ?? 8) !== currentHour) continue;
-        targetGardenId = gDoc.id;
 
         const plantsSnap = await db.collection("users").doc(uid)
           .collection("gardens").doc(gDoc.id).collection("plants").get();

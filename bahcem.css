@@ -1853,12 +1853,17 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 
 /* ── Bahçe ikon butonu ── */
 .garden-card-icon-btn {
-  background: none;
+  background: var(--surface2);
   border: none;
   font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 12px;
+  padding: 0;
   transition: background 0.15s, transform 0.15s;
   flex-shrink: 0;
   line-height: 1;
