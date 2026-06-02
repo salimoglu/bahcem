@@ -210,6 +210,113 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleDateString("tr-TR", { day:"numeric", month:"short", year:"numeric" });
 }
 
+const LONG_PRESS_MS = 550;
+const LONG_PRESS_MOVE_PX = 16;
+
+function attachLongPress(el, { onLongPress, onTap, holdClass = "plant-card-holding" }) {
+  let timer = null;
+  let blockTap = false;
+  let startX = 0;
+  let startY = 0;
+
+  const clearTimer = () => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    el.classList.remove(holdClass);
+  };
+
+  const begin = (x, y) => {
+    blockTap = false;
+    startX = x;
+    startY = y;
+    el.classList.add(holdClass);
+    timer = setTimeout(() => {
+      timer = null;
+      blockTap = true;
+      el.classList.remove(holdClass);
+      onLongPress();
+    }, LONG_PRESS_MS);
+  };
+
+  const move = (x, y) => {
+    if (!timer) return;
+    if (Math.abs(x - startX) > LONG_PRESS_MOVE_PX || Math.abs(y - startY) > LONG_PRESS_MOVE_PX) clearTimer();
+  };
+
+  const end = () => {
+    if (timer) {
+      clearTimer();
+      if (onTap) onTap();
+      return;
+    }
+    if (blockTap) setTimeout(() => { blockTap = false; }, 450);
+  };
+
+  el.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) return;
+    begin(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  el.addEventListener("touchmove", e => {
+    if (e.touches.length !== 1) return;
+    move(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  el.addEventListener("touchend", end);
+  el.addEventListener("touchcancel", clearTimer);
+
+  el.addEventListener("mousedown", e => {
+    if (e.button !== 0) return;
+    begin(e.clientX, e.clientY);
+  });
+  el.addEventListener("mousemove", e => move(e.clientX, e.clientY));
+  el.addEventListener("mouseup", end);
+  el.addEventListener("mouseleave", clearTimer);
+
+  el.addEventListener("click", e => {
+    if (blockTap) { e.preventDefault(); e.stopPropagation(); }
+  });
+}
+
+async function waterPlant(pid, { silent = false } = {}) {
+  if (!currentGardenId) return false;
+  const p = plants.find(x => x.id === pid);
+  if (!p) return false;
+  const now = new Date().toISOString();
+  const history = [...(p.wateringHistory || []), now];
+  if (history.length > 30) history.splice(0, history.length - 30);
+  try {
+    await plantsCol(currentGardenId).doc(pid).update({ lastWateredAt: now, wateringHistory: history });
+    p.lastWateredAt = now;
+    p.wateringHistory = history;
+    if (!silent) toast(`${p.nameTr || "Bitki"} sulandı 💧`);
+    return true;
+  } catch (e) {
+    if (!silent) toast("Hata: " + e.message);
+    return false;
+  }
+}
+
+function attachPlantCardInteractions(card, pid) {
+  attachLongPress(card, {
+    onLongPress: async () => {
+      card.classList.add("plant-card-watered");
+      setTimeout(() => card.classList.remove("plant-card-watered"), 600);
+      if (navigator.vibrate) navigator.vibrate(40);
+      await waterPlant(pid);
+    },
+    onTap: () => openPlantDetail(pid)
+  });
+
+  card.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") openPlantDetail(pid);
+  });
+
+  card.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    waterPlant(pid);
+  });
+}
+
 // ─── EKRAN GEÇİŞİ ───
 let lastExitPress = 0;
 let historyNavReady = false;
@@ -680,7 +787,7 @@ function renderPlants() {
     const latin = p.nameLat ? `<span class="plant-latin">${esc(p.nameLat)}</span>` : "";
     const light = p.light   ? `<span class="info-badge info-light">${esc(p.light)}</span>` : "";
     return `
-      <article class="plant-card ${borderCls}" data-id="${escA(p.id)}" role="button" tabindex="0">
+      <article class="plant-card ${borderCls}" data-id="${escA(p.id)}" role="button" tabindex="0" title="Basılı tut: sulama kaydet">
         <div class="plant-card-img">${thumb}</div>
         <div class="plant-meta">
           <h3>${esc(p.nameTr||"Bitki")}</h3>
@@ -692,8 +799,7 @@ function renderPlants() {
   }).join("");
 
   list.querySelectorAll(".plant-card").forEach(c => {
-    c.addEventListener("click", () => openPlantDetail(c.dataset.id));
-    c.addEventListener("keydown", e => { if (e.key==="Enter"||e.key===" ") openPlantDetail(c.dataset.id); });
+    attachPlantCardInteractions(c, c.dataset.id);
   });
 }
 
@@ -768,13 +874,10 @@ function openPlantDetail(pid) {
   };
   document.getElementById("btn-det-close").onclick = () => closeOverlay("modal-plant-detail", true);
   document.getElementById("btn-det-water").onclick = async () => {
-    const now = new Date().toISOString();
-    const history = [...(p.wateringHistory||[]), now];
-    if (history.length > 30) history.splice(0, history.length - 30); // son 30 kayıt
-    await plantsCol(currentGardenId).doc(pid).update({ lastWateredAt: now, wateringHistory: history });
-    // local güncelle (modal yeniden açılacak)
-    p.lastWateredAt = now; p.wateringHistory = history;
-    toast("Sulama kaydedildi 💧"); openPlantDetail(pid);
+    if (await waterPlant(pid, { silent: true })) {
+      toast("Sulama kaydedildi 💧");
+      openPlantDetail(pid);
+    }
   };
   document.getElementById("btn-det-save").onclick = async () => {
     await plantsCol(currentGardenId).doc(pid).update({ wateringIntervalDays: detInterval });
