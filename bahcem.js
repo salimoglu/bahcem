@@ -143,6 +143,7 @@ function openSettingsModal() {
   const elCp2 = document.getElementById("pref-compact"); if(elCp2) elCp2.checked = localStorage.getItem(PREF_COMPACT) === "1";
   syncWaterDaysInputState();
   updateNotifStatus();
+  renderNotifGardensSummary();
   document.getElementById("modal-settings").classList.add("show");
   openOverlay("modal-settings");
 }
@@ -642,15 +643,18 @@ function renderGardens() {
     });
   });
 
-  // Saat + dakika seçici
+  // Saat seçici
   list.querySelectorAll(".gc-notif-hour").forEach(sel => {
     sel.addEventListener("change", async () => {
       const gid = sel.dataset.gid;
       const hour = Number(sel.value);
       await gardensCol().doc(gid).update({ notifHour: hour });
       toast(`Bildirim saati ${String(hour).padStart(2,"0")}:00 ✓`);
+      renderNotifGardensSummary();
     });
   });
+
+  if (getOpenModalId() === "modal-settings") renderNotifGardensSummary();
 }
 
 function openGarden(gid, skipHistory) {
@@ -1514,6 +1518,7 @@ function updateNotifStatus() {
   if (!("Notification" in window)) {
     st.textContent = "❌ Bu cihaz bildirimleri desteklemiyor";
     if (wrap) wrap.style.display = "none";
+    renderNotifGardensSummary();
     return;
   }
 
@@ -1521,6 +1526,57 @@ function updateNotifStatus() {
   st.textContent = isOn ? "✅ Bildirimler açık" : "🔔 Bildirimler kapalı";
   if (wrap) wrap.style.display = "block";
   if (chk)  { chk.checked = isOn; chk.onchange = null; chk.onchange = handleNotifToggle; }
+  renderNotifGardensSummary();
+}
+
+function renderNotifGardensSummary() {
+  const box = document.getElementById("notif-gardens-summary");
+  if (!box) return;
+
+  if (!gardens.length) {
+    box.innerHTML = `<p class="notif-gardens-empty">Henüz bahçe yok.</p>`;
+    return;
+  }
+
+  if (!("Notification" in window)) {
+    box.innerHTML = `<p class="notif-gardens-empty">Bu cihaz bildirimleri desteklemiyor.</p>`;
+    return;
+  }
+
+  if (Notification.permission !== "granted") {
+    box.innerHTML = `<p class="notif-gardens-empty">Bahçe bildirimleri için önce yukarıdan izin verin.</p>`;
+    return;
+  }
+
+  const globalOff = !globalNotifEnabled();
+  const rows = gardens.map(g => {
+    const icon = esc(g.icon || "🌿");
+    const name = esc(g.name || "Bahçe");
+    let status, rowCls;
+    if (g.notifOn) {
+      const h = g.notifHour ?? 8;
+      status = `Bildirim saati ${String(h).padStart(2, "0")}:00`;
+      rowCls = "on";
+    } else {
+      status = "Bildirim kapalı";
+      rowCls = "off";
+    }
+    return `<li class="notif-garden-row notif-garden-${rowCls}">
+      <span class="notif-garden-icon">${icon}</span>
+      <span class="notif-garden-name">${name}</span>
+      <span class="notif-garden-status">${esc(status)}</span>
+    </li>`;
+  }).join("");
+
+  const globalNote = globalOff
+    ? `<p class="notif-gardens-note">Genel bildirim kapalı — bahçe ayarları kayıtlı ama gönderilmez.</p>`
+    : "";
+
+  box.innerHTML = `
+    <p class="notif-gardens-heading">Bahçe bildirimleri</p>
+    ${globalNote}
+    <ul class="notif-gardens-list">${rows}</ul>
+  `;
 }
 
 async function handleNotifToggle() {
