@@ -10,12 +10,14 @@ const fcm = getMessaging();
 const APP_URL = "https://salimoglu.github.io/bahcem/";
 const MAX_BODY_LEN = 280;
 
-/** Uygulamadaki waterStatus ile aynı mantık */
+/** Uygulamadaki waterStatus + needWater ile aynı mantık (key !== "ok") */
 function plantNeedsWater(p) {
   const days = Math.max(1, Number(p.wateringIntervalDays) || 7);
   if (!p.lastWateredAt) return true;
   const base = new Date(p.lastWateredAt).getTime();
-  return Date.now() >= base + days * 86400000;
+  const next = base + days * 86400000;
+  const diff = Math.round((next - Date.now()) / 86400000);
+  return diff <= 1; // gecikti, bugün veya yarın
 }
 
 function formatNotifBody(byGarden) {
@@ -101,30 +103,39 @@ exports.sulamaKontrol = onSchedule(
 
       for (const gDoc of gardensSnap.docs) {
         const g = gDoc.data();
-        if (!g.notifOn) continue;
+        const gName = g.name || gDoc.id;
+
+        if (!g.notifOn) {
+          console.log(`${uid}/${gName}: bildirim kapalı (notifOn=false), atlandı`);
+          continue;
+        }
+
         const gHour = g.notifHour ?? 8;
         if (gHour !== currentHour) {
-          console.log(`${uid}/${g.name || gDoc.id}: saat ${gHour} ≠ ${currentHour}, atlandı`);
+          console.log(`${uid}/${gName}: saat ${gHour} ≠ ${currentHour}, atlandı`);
           continue;
         }
 
         const plantsSnap = await db.collection("users").doc(uid)
           .collection("gardens").doc(gDoc.id).collection("plants").get();
 
+        let gardenDue = 0;
         for (const pDoc of plantsSnap.docs) {
           const p = pDoc.data();
           if (plantNeedsWater(p)) {
+            gardenDue++;
             overdue.push({
               name: p.nameTr || "Bitki",
-              gardenName: g.name || "Bahçe",
+              gardenName: gName,
               gardenId: gDoc.id
             });
           }
         }
+        console.log(`${uid}/${gName}: ${gardenDue}/${plantsSnap.size} bitki sulama bekliyor`);
       }
 
       if (!overdue.length) {
-        console.log(`${uid}: bu saatte bildirim gönderilecek bitki yok`);
+        console.log(`${uid}: bildirim gönderilmedi — bahçe saati/notifOn kontrol edin veya bitki henüz listede değil`);
         continue;
       }
 
