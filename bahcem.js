@@ -213,6 +213,12 @@ function fmtDate(iso) {
 const LONG_PRESS_MS = 550;
 const LONG_PRESS_MOVE_PX = 16;
 
+function clearTextSelection() {
+  const sel = window.getSelection?.();
+  if (sel?.removeAllRanges) sel.removeAllRanges();
+  else if (document.selection) document.selection.empty();
+}
+
 function attachLongPress(el, { onLongPress, onTap, holdClass = "plant-card-holding" }) {
   let timer = null;
   let blockTap = false;
@@ -228,11 +234,13 @@ function attachLongPress(el, { onLongPress, onTap, holdClass = "plant-card-holdi
     blockTap = false;
     startX = x;
     startY = y;
+    clearTextSelection();
     el.classList.add(holdClass);
     timer = setTimeout(() => {
       timer = null;
       blockTap = true;
       el.classList.remove(holdClass);
+      clearTextSelection();
       onLongPress();
     }, LONG_PRESS_MS);
   };
@@ -250,6 +258,9 @@ function attachLongPress(el, { onLongPress, onTap, holdClass = "plant-card-holdi
     }
     if (blockTap) setTimeout(() => { blockTap = false; }, 450);
   };
+
+  el.addEventListener("selectstart", e => e.preventDefault());
+  el.addEventListener("dragstart", e => e.preventDefault());
 
   el.addEventListener("touchstart", e => {
     if (e.touches.length !== 1) return;
@@ -963,16 +974,16 @@ function renderCatalog(query, cat) {
   }
   grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
     const dbPlant = PLANTS_DB[Number(btn.dataset.idx)];
-    // Kısa tık → seç/kaldır
-    btn.addEventListener("click", () => togglePlantSelect(dbPlant, btn));
-    // Long press → önizleme
-    let pressTimer = null;
-    btn.addEventListener("pointerdown", () => {
-      pressTimer = setTimeout(() => { pressTimer = null; showPlantPreview(dbPlant); }, 500);
+    attachLongPress(btn, {
+      holdClass: "catalog-btn-holding",
+      onLongPress: () => showPlantPreview(dbPlant),
+      onTap: () => togglePlantSelect(dbPlant, btn)
     });
-    btn.addEventListener("pointerup",   () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    btn.addEventListener("pointerleave",() => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
-    btn.addEventListener("contextmenu", e => { e.preventDefault(); showPlantPreview(dbPlant); });
+    btn.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      clearTextSelection();
+      showPlantPreview(dbPlant);
+    });
   });
 }
 
@@ -981,6 +992,7 @@ function renderCatalog(query, cat) {
 
 // ─── BİTKİ ÖNİZLEME (long press) ───
 function showPlantPreview(dbPlant) {
+  clearTextSelection();
   const m   = document.getElementById("modal-plant-preview");
   const box = document.getElementById("preview-content");
   const inGarden = plants.some(p => (p.nameTr||"").toLocaleLowerCase("tr") === dbPlant.nameTr.toLocaleLowerCase("tr"));
