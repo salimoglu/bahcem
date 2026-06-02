@@ -556,12 +556,26 @@ async function saveGarden() {
 }
 
 // ─── BİTKİLER ───
+function showPlantsLoadingState() {
+  plants = [];
+  const list  = document.getElementById("plant-list");
+  const empty = document.getElementById("plants-empty");
+  const banner = document.getElementById("watering-banner");
+  if (banner) banner.remove();
+  if (empty) empty.classList.add("hidden");
+  if (list) {
+    list.innerHTML = "Yükleniyor…";
+    list.classList.add("plant-grid-loading");
+  }
+}
+
 function listenPlants(gid) {
   if (unsubPlants) { unsubPlants(); unsubPlants = null; }
+  showPlantsLoadingState();
   unsubPlants = plantsCol(gid).orderBy("createdAt","desc").onSnapshot(snap => {
+    if (gid !== currentGardenId) return;
     plants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderPlants();
-    // Sulama istatistiklerini Firestore'a kaydet (bahçe kartında göstermek için)
     const total   = plants.length;
     const needWater = plants.filter(p => waterStatus(p).key !== "ok").length;
     const okCount   = total - needWater;
@@ -614,7 +628,8 @@ function updateWateringBanner() {
 function renderPlants() {
   const list  = document.getElementById("plant-list");
   const empty = document.getElementById("plants-empty");
-  if (!plants.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
+  if (list) list.classList.remove("plant-grid-loading");
+  if (!plants.length) { if (list) list.innerHTML = ""; empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden");
   // Render bittikten sonra sulama banner'ını güncelle
   setTimeout(updateWateringBanner, 0);

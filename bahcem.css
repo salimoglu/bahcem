@@ -358,6 +358,27 @@ button:active, .btn:active { transform: scale(0.97); }
   .plant-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; }
 }
 
+.plant-grid-loading {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.plant-grid-loading::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: plant-spin 0.7s linear infinite;
+}
+@keyframes plant-spin { to { transform: rotate(360deg); } }
+
 .plant-card {
   display: flex;
   flex-direction: column;
