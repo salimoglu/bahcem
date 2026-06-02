@@ -1380,6 +1380,69 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 }
 .modal-top-header h2 { margin: 0; font-size: 1rem; }
 
+/* Tohum hızlı ekleme */
+.seed-add-panel {
+  margin: 0 12px 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.14), rgba(46, 125, 50, 0.08));
+  border: 1.5px solid rgba(46, 125, 50, 0.28);
+  flex-shrink: 0;
+}
+.seed-add-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  margin-bottom: 4px;
+}
+.seed-add-hint {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.seed-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.88rem;
+  font-family: inherit;
+  margin-bottom: 10px;
+}
+.seed-name-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.seed-interval-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.seed-interval-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.seed-interval-ctrl { flex-shrink: 0; }
+.seed-add-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.seed-add-actions .btn-primary { flex: 1; min-width: 120px; }
+.seed-custom-btn { border-color: rgba(46, 125, 50, 0.45) !important; }
+.seed-interval-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
 /* Arama inputu — modal-top içinde */
 .modal-top .plant-search-input {
   margin: 8px 12px 0;

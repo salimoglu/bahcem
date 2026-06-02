@@ -944,8 +944,72 @@ function openPlantDetail(pid) {
 }
 
 // ─── BİTKİ EKLEME ───
+let seedIntervalDays = 3;
+
+function resetSeedForm() {
+  seedIntervalDays = 3;
+  const nameEl = document.getElementById("field-seed-name");
+  const valEl  = document.getElementById("seed-interval-val");
+  if (nameEl) nameEl.value = "";
+  if (valEl)  valEl.textContent = "3";
+}
+
+function readSeedForm() {
+  const nameEl = document.getElementById("field-seed-name");
+  const name = nameEl ? nameEl.value.trim() : "";
+  if (!name) { toast("Tohum adı yazın"); return null; }
+  const interval = Math.min(90, Math.max(1, seedIntervalDays));
+  return { name, interval };
+}
+
+function makeSeedPlant(name, interval) {
+  const id = `seed-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return {
+    id,
+    nameTr: name,
+    nameLat: "",
+    emoji: "🌱",
+    light: "",
+    care: "Tohum — sulama takibi",
+    waterDays: interval,
+    category: "tohum",
+    isSeed: true
+  };
+}
+
+function queueCustomSeed(name, interval) {
+  const dbPlant = makeSeedPlant(name, interval);
+  selectedPlants.set(dbPlant.id, { dbPlant, interval, imageUrl: "" });
+  renderCatalog();
+  updateSelectionBar();
+  resetSeedForm();
+  toast(`${name} seçime eklendi 🌱`);
+}
+
+async function saveCustomSeedNow(name, interval) {
+  if (!currentGardenId) return;
+  const col = plantsCol(currentGardenId);
+  const now = new Date().toISOString();
+  await col.add({
+    nameTr: name,
+    nameLat: "",
+    care: "Tohum — sulama takibi",
+    excerpt: "",
+    imageUrl: "",
+    light: "",
+    emoji: "🌱",
+    isSeed: true,
+    wateringIntervalDays: interval,
+    wikiUrl: "",
+    lastWateredAt: null,
+    wateringHistory: [],
+    createdAt: now
+  });
+}
+
 function openAddPlant() {
   selectedPlants.clear(); activeCat = "all";
+  resetSeedForm();
   const searchEl = document.getElementById("field-plant-search");
   if (searchEl) searchEl.value = "";
   document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === "all"));
@@ -953,7 +1017,10 @@ function openAddPlant() {
   updateSelectionBar();
   document.getElementById("modal-add-plant").classList.add("show");
   openOverlay("modal-add-plant");
-  setTimeout(() => { if (searchEl) searchEl.focus(); }, 120);
+  setTimeout(() => {
+    const seedEl = document.getElementById("field-seed-name");
+    if (seedEl) seedEl.focus();
+  }, 120);
 }
 function closeAddPlant() { closeOverlay("modal-add-plant", true); }
 
@@ -1009,10 +1076,36 @@ function renderCatalog(query, cat) {
       <span class="popular-name">${esc(p.nameTr)}${noTr ? '<span class="no-tr-badge">EN</span>' : ''}</span>
     </button>`;
   }).join("");
+
+  // Seçili özel tohumlar (katalogda yok)
+  const customSeeds = [...selectedPlants.values()].filter(x => x.dbPlant.isSeed);
+  if (customSeeds.length) {
+    const seedBtns = customSeeds.map(({ dbPlant, interval }) =>
+      `<button class="popular-plant-btn selected seed-custom-btn" data-custom-seed="${escA(dbPlant.id)}" type="button">
+        <span class="sel-check">✓</span>
+        <span class="popular-emoji">🌱</span>
+        <span class="popular-name">${esc(dbPlant.nameTr)}</span>
+        <span class="seed-interval-badge">${interval}g</span>
+      </button>`
+    ).join("");
+    grid.innerHTML = seedBtns + grid.innerHTML;
+  }
+
   if (moreCount > 0) {
     grid.innerHTML += `<p class="catalog-more-hint">+ ${moreCount} bitki daha — aramak için yazmaya başlayın</p>`;
   }
-  grid.querySelectorAll(".popular-plant-btn").forEach(btn => {
+  grid.querySelectorAll(".popular-plant-btn[data-custom-seed]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.customSeed;
+      if (selectedPlants.has(id)) {
+        selectedPlants.delete(id);
+        renderCatalog();
+        updateSelectionBar();
+      }
+    });
+  });
+
+  grid.querySelectorAll(".popular-plant-btn[data-idx]").forEach(btn => {
     const dbPlant = PLANTS_DB[Number(btn.dataset.idx)];
     let pressTimer = null;
     let longPressFired = false;
@@ -1268,9 +1361,10 @@ async function savePlant() {
         excerpt:             "",
         imageUrl:            imageUrl         || "",
         light:               dbPlant.light    || "",
-        emoji:               dbPlant.emoji    || "🌿",
+        emoji:               dbPlant.emoji    || (dbPlant.isSeed ? "🌱" : "🌿"),
+        isSeed:              dbPlant.isSeed === true,
         wateringIntervalDays: interval,
-        wikiUrl:             `https://tr.wikipedia.org/wiki/${encodeURIComponent((dbPlant.nameLat||dbPlant.nameTr).replace(/ /g,"_"))}`,
+        wikiUrl:             dbPlant.isSeed ? "" : `https://tr.wikipedia.org/wiki/${encodeURIComponent((dbPlant.nameLat||dbPlant.nameTr).replace(/ /g,"_"))}`,
         lastWateredAt:       null,
         wateringHistory:     [],
         createdAt:           now
@@ -1337,6 +1431,38 @@ function wireOnce() {
   // Bitki ekle
   (document.getElementById("btn-add-plant")||{addEventListener:()=>{}}).addEventListener("click",       openAddPlant);
   (document.getElementById("btn-add-plant-empty")||{addEventListener:()=>{}}).addEventListener("click", openAddPlant);
+
+  const seedDown = document.getElementById("seed-step-down");
+  const seedUp   = document.getElementById("seed-step-up");
+  const seedVal  = document.getElementById("seed-interval-val");
+  if (seedDown) seedDown.addEventListener("click", () => {
+    seedIntervalDays = Math.max(1, seedIntervalDays - 1);
+    if (seedVal) seedVal.textContent = String(seedIntervalDays);
+  });
+  if (seedUp) seedUp.addEventListener("click", () => {
+    seedIntervalDays = Math.min(90, seedIntervalDays + 1);
+    if (seedVal) seedVal.textContent = String(seedIntervalDays);
+  });
+  (document.getElementById("btn-add-seed-now")||{addEventListener:()=>{}}).addEventListener("click", async () => {
+    const form = readSeedForm();
+    if (!form) return;
+    try {
+      await saveCustomSeedNow(form.name, form.interval);
+      resetSeedForm();
+      closeAddPlant();
+      toast(`${form.name} eklendi 🌱`);
+    } catch (e) { toast("Hata: " + e.message); }
+  });
+  (document.getElementById("btn-add-seed-queue")||{addEventListener:()=>{}}).addEventListener("click", () => {
+    const form = readSeedForm();
+    if (!form) return;
+    queueCustomSeed(form.name, form.interval);
+  });
+  const seedNameEl = document.getElementById("field-seed-name");
+  if (seedNameEl) seedNameEl.addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("btn-add-seed-now")?.click();
+  });
+
   (document.getElementById("modal-plant-close")||{addEventListener:()=>{}}).addEventListener("click",   closeAddPlant);
   (document.getElementById("modal-add-plant")||{addEventListener:()=>{}}).addEventListener("click", e => { if(e.target.id==="modal-add-plant") closeAddPlant(); });
 

@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"/>
-  <link rel="stylesheet" href="bahcem.css?v=1780343100"/>
+  <link rel="stylesheet" href="bahcem.css?v=1780343200"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -144,6 +144,27 @@
         </button>
       </div>
 
+      <!-- Tohum — hızlı ekleme (en üstte) -->
+      <div id="seed-add-panel" class="seed-add-panel">
+        <div class="seed-add-title">🌱 Tohum ekle</div>
+        <p class="seed-add-hint">Katalogda olmayan tohumları adıyla ekleyin; sulama aralığını siz belirleyin.</p>
+        <input type="text" id="field-seed-name" class="seed-name-input" maxlength="60"
+               autocomplete="off" placeholder="Tohum adı… örn. Domates, Fesleğen"/>
+        <div class="seed-interval-row">
+          <span class="seed-interval-label">Sulama aralığı</span>
+          <div class="ppc-watering-ctrl seed-interval-ctrl">
+            <button type="button" class="ppc-step" id="seed-step-down" aria-label="Azalt">−</button>
+            <span id="seed-interval-val" class="det-interval-num">3</span>
+            <span class="ppc-day-label">gün</span>
+            <button type="button" class="ppc-step" id="seed-step-up" aria-label="Artır">+</button>
+          </div>
+        </div>
+        <div class="seed-add-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-add-seed-now">Tohumu ekle ✓</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-add-seed-queue">Seçime ekle</button>
+        </div>
+      </div>
+
       <!-- Arama -->
       <input type="text" id="field-plant-search" class="plant-search-input"
              autocomplete="off" placeholder="🔍 Bitki adı ara…"/>
@@ -274,6 +295,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="bahcem.js?v=1780343100" defer></script>
+  <script src="bahcem.js?v=1780343200" defer></script>
 </body>
 </html>
