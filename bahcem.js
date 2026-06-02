@@ -220,14 +220,33 @@ function fmtDate(iso) {
 // ─── EKRAN GEÇİŞİ ───
 let lastExitPress = 0;
 let historyNavReady = false;
+const EDGE_SWIPE_PX = 32;
+const SWIPE_MIN_PX  = 70;
+const MODAL_IDS = ["modal-garden","modal-add-plant","modal-plant-detail","modal-plant-preview","modal-settings","modal-feedback"];
 
 function getActiveScreenId() {
   const el = document.querySelector(".screen.active");
   return el ? el.id : "screen-gardens";
 }
 
+function isAppVisible() {
+  const app = document.getElementById("app-screen");
+  return currentUser && app && app.style.display !== "none";
+}
+
+function closeAnyOpenModal() {
+  for (const id of MODAL_IDS) {
+    const el = document.getElementById(id);
+    if (el && el.classList.contains("show")) {
+      el.classList.remove("show");
+      return true;
+    }
+  }
+  return false;
+}
+
 function initAppHistory() {
-  history.replaceState({ bahcem: "gardens" }, "");
+  history.pushState({ bahcem: "gardens" }, "", location.href);
   lastExitPress = 0;
 }
 
@@ -237,35 +256,89 @@ function goBackToGardensList() {
   showScreen("screen-gardens");
 }
 
+/** Sistem geri / popstate (tarayıcı zaten bir adım geri gitti) */
+function handlePopStateBack() {
+  if (!isAppVisible()) return;
+
+  if (closeAnyOpenModal()) {
+    history.pushState(history.state || { bahcem: "gardens" }, "", location.href);
+    return;
+  }
+
+  if (getActiveScreenId() === "screen-plants") {
+    goBackToGardensList();
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastExitPress < 2000) {
+    lastExitPress = 0;
+    return;
+  }
+  lastExitPress = now;
+  toast("Çıkmak için tekrar geri basın");
+  history.pushState({ bahcem: "gardens" }, "", location.href);
+}
+
+/** Ekran içi geri butonu ve kenar kaydırma */
+function performBack() {
+  if (!isAppVisible()) return;
+
+  if (closeAnyOpenModal()) return;
+
+  if (getActiveScreenId() === "screen-plants") {
+    goBackToGardensList();
+    history.replaceState({ bahcem: "gardens" }, "", location.href);
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastExitPress < 2000) {
+    lastExitPress = 0;
+    history.back();
+    return;
+  }
+  lastExitPress = now;
+  toast("Çıkmak için tekrar geri basın");
+}
+
+function setupEdgeSwipeBack() {
+  const root = document.getElementById("app-screen");
+  if (!root || root._swipeBack) return;
+  root._swipeBack = true;
+
+  let startX = 0, startY = 0, edge = null;
+
+  root.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) return;
+    const x = e.touches[0].clientX;
+    const w = window.innerWidth;
+    if (x <= EDGE_SWIPE_PX) edge = "left";
+    else if (x >= w - EDGE_SWIPE_PX) edge = "right";
+    else edge = null;
+    startX = x;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  root.addEventListener("touchend", e => {
+    if (!edge) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    edge = null;
+    if (Math.abs(dx) < SWIPE_MIN_PX) return;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    if (edge === "left" && dx > 0) performBack();
+    else if (edge === "right" && dx < 0) performBack();
+  }, { passive: true });
+}
+
 function setupHistoryNavigation() {
   if (historyNavReady) return;
   historyNavReady = true;
 
-  window.addEventListener("popstate", e => {
-    if (!currentUser) return;
-    const app = document.getElementById("app-screen");
-    if (!app || app.style.display === "none") return;
-
-    const st = e.state;
-    if (st?.bahcem === "plants" && st.gardenId) {
-      openGarden(st.gardenId, true);
-      return;
-    }
-
-    if (getActiveScreenId() === "screen-plants") {
-      goBackToGardensList();
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastExitPress < 2000) {
-      lastExitPress = 0;
-      return;
-    }
-    lastExitPress = now;
-    toast("Çıkmak için tekrar geri basın");
-    history.pushState({ bahcem: "gardens" }, "");
-  });
+  window.addEventListener("popstate", () => handlePopStateBack());
+  setupEdgeSwipeBack();
 }
 
 function showScreen(id) {
@@ -404,7 +477,7 @@ function openGarden(gid, skipHistory) {
   document.getElementById("garden-title-display").textContent = g ? g.name : "";
   showScreen("screen-plants");
   listenPlants(gid);
-  if (!skipHistory) history.pushState({ bahcem: "plants", gardenId: gid }, "");
+  if (!skipHistory) history.pushState({ bahcem: "plants", gardenId: gid }, "", location.href);
 }
 
 function tryOpenPendingGarden() {
@@ -1039,10 +1112,8 @@ function wireOnce() {
     });
   })();
 
-  // Geri (ekran içi buton = tarayıcı geri tuşu ile aynı)
-  (document.getElementById("btn-back")||{addEventListener:()=>{}}).addEventListener("click", () => {
-    history.back();
-  });
+  // Geri (buton, sistem geri ve kenar kaydırma ile aynı)
+  (document.getElementById("btn-back")||{addEventListener:()=>{}}).addEventListener("click", performBack);
 
   // Bahçe
   (document.getElementById("btn-add-garden")||{addEventListener:()=>{}}).addEventListener("click",       () => openGardenModal("add"));
