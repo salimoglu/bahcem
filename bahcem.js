@@ -334,7 +334,7 @@ let lastExitPress = 0;
 let historyNavReady = false;
 const EDGE_SWIPE_PX = 32;
 const SWIPE_MIN_PX  = 70;
-const MODAL_IDS = ["modal-garden","modal-add-plant","modal-plant-detail","modal-plant-preview","modal-settings"];
+const MODAL_IDS = ["modal-garden","modal-add-plant","modal-plant-detail","modal-plant-preview","modal-settings","modal-seed-quick"];
 
 function getActiveScreenId() {
   const el = document.querySelector(".screen.active");
@@ -1007,6 +1007,17 @@ async function saveCustomSeedNow(name, interval) {
   });
 }
 
+function openSeedModal() {
+  resetSeedForm();
+  document.getElementById("modal-seed-quick").classList.add("show");
+  openOverlay("modal-seed-quick");
+  setTimeout(() => document.getElementById("field-seed-name")?.focus(), 80);
+}
+
+function closeSeedModal() {
+  closeOverlay("modal-seed-quick", true);
+}
+
 function openAddPlant() {
   selectedPlants.clear(); activeCat = "all";
   resetSeedForm();
@@ -1017,10 +1028,7 @@ function openAddPlant() {
   updateSelectionBar();
   document.getElementById("modal-add-plant").classList.add("show");
   openOverlay("modal-add-plant");
-  setTimeout(() => {
-    const seedEl = document.getElementById("field-seed-name");
-    if (seedEl) seedEl.focus();
-  }, 120);
+  setTimeout(() => { if (searchEl) searchEl.focus(); }, 120);
 }
 function closeAddPlant() { closeOverlay("modal-add-plant", true); }
 
@@ -1053,7 +1061,12 @@ function renderCatalog(query, cat) {
   const customSeeds = [...selectedPlants.values()].filter(x => x.dbPlant.isSeed);
 
   if (!results.length && !customSeeds.length) {
-    grid.innerHTML = `<p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
+    grid.innerHTML = `<button class="popular-plant-btn seed-entry-btn" type="button" data-seed-entry="1">
+      <span class="popular-emoji">🌱</span>
+      <span class="popular-name">Tohum ekle</span>
+    </button>
+    <p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
+    grid.querySelector(".seed-entry-btn")?.addEventListener("click", openSeedModal);
     return;
   }
   // Bahçedeki mevcut bitki adları (küçük harfle karşılaştırma için)
@@ -1063,8 +1076,12 @@ function renderCatalog(query, cat) {
   const displayResults = q ? results : results.slice(0, 300);
   const moreCount = q ? 0 : Math.max(0, results.length - 300);
 
-  // Seçili özel tohumlar (katalogda yok — grid'in en üstünde)
-  let gridHtml = "";
+  // Seçili özel tohumlar + tohum ekle kartı (grid'in en üstünde)
+  let gridHtml = `<button class="popular-plant-btn seed-entry-btn" type="button" data-seed-entry="1">
+    <span class="popular-emoji">🌱</span>
+    <span class="popular-name">Tohum ekle</span>
+  </button>`;
+
   if (customSeeds.length) {
     gridHtml += customSeeds.map(({ dbPlant, interval }) =>
       `<button class="popular-plant-btn selected seed-custom-btn" data-custom-seed="${escA(dbPlant.id)}" type="button">
@@ -1096,6 +1113,9 @@ function renderCatalog(query, cat) {
   if (moreCount > 0) {
     grid.innerHTML += `<p class="catalog-more-hint">+ ${moreCount} bitki daha — aramak için yazmaya başlayın</p>`;
   }
+
+  grid.querySelector(".seed-entry-btn")?.addEventListener("click", openSeedModal);
+
   grid.querySelectorAll(".popular-plant-btn[data-custom-seed]").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.dataset.customSeed;
@@ -1451,6 +1471,7 @@ function wireOnce() {
     try {
       await saveCustomSeedNow(form.name, form.interval);
       resetSeedForm();
+      closeSeedModal();
       closeAddPlant();
       toast(`${form.name} eklendi 🌱`);
     } catch (e) { toast("Hata: " + e.message); }
@@ -1459,6 +1480,11 @@ function wireOnce() {
     const form = readSeedForm();
     if (!form) return;
     queueCustomSeed(form.name, form.interval);
+    closeSeedModal();
+  });
+  (document.getElementById("modal-seed-close")||{addEventListener:()=>{}}).addEventListener("click", closeSeedModal);
+  (document.getElementById("modal-seed-quick")||{addEventListener:()=>{}}).addEventListener("click", e => {
+    if (e.target.id === "modal-seed-quick") closeSeedModal();
   });
   const seedNameEl = document.getElementById("field-seed-name");
   if (seedNameEl) seedNameEl.addEventListener("keydown", e => {

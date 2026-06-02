@@ -1380,26 +1380,25 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 }
 .modal-top-header h2 { margin: 0; font-size: 1rem; }
 
-/* Tohum hızlı ekleme */
-.seed-add-panel {
-  margin: 0 12px 8px;
-  padding: 12px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(139, 195, 74, 0.14), rgba(46, 125, 50, 0.08));
-  border: 1.5px solid rgba(46, 125, 50, 0.28);
-  flex-shrink: 0;
+/* Tohum — grid kartı + kompakt modal */
+.seed-entry-btn {
+  border-color: rgba(46, 125, 50, 0.45) !important;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.12), var(--surface2)) !important;
 }
-.seed-add-title {
-  font-size: 0.92rem;
+.seed-entry-btn .popular-name {
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+.modal-seed-quick {
+  width: min(340px, 92vw);
+  padding: 16px;
+  border-radius: 16px;
+}
+.seed-modal-title {
+  margin: 0 0 12px;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--accent-dark);
-  margin-bottom: 4px;
-}
-.seed-add-hint {
-  margin: 0 0 10px;
-  font-size: 0.72rem;
-  color: var(--muted);
-  line-height: 1.4;
 }
 .seed-name-input {
   width: 100%;
@@ -1410,7 +1409,7 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   background: var(--surface);
   font-size: 0.88rem;
   font-family: inherit;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .seed-name-input:focus {
   outline: none;
@@ -1421,20 +1420,19 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 .seed-interval-label {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--muted);
 }
-.seed-interval-ctrl { flex-shrink: 0; }
-.seed-add-actions {
-  display: flex;
-  gap: 8px;
+.seed-modal-actions {
   flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0;
 }
-.seed-add-actions .btn-primary { flex: 1; min-width: 120px; }
+.seed-modal-actions .btn-primary { flex: 1; min-width: 80px; }
 .seed-custom-btn { border-color: rgba(46, 125, 50, 0.45) !important; }
 .seed-interval-badge {
   font-size: 0.58rem;
