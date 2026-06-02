@@ -89,16 +89,21 @@ exports.sulamaKontrol = onSchedule(
 
       const title = "🌿 Bahçem — Sulama Zamanı";
       const body  = formatNotifBody(byGarden);
-      const gardenIds = [...new Set(overdue.map(p => p.gardenId))];
-      const url = gardenIds.length === 1
-        ? `${APP_URL}?garden=${gardenIds[0]}`
-        : APP_URL;
+
+      // En çok sulanması gereken bitki olan bahçeye yönlendir
+      const countByGarden = {};
+      for (const p of overdue) {
+        countByGarden[p.gardenId] = (countByGarden[p.gardenId] || 0) + 1;
+      }
+      const primaryGardenId = Object.entries(countByGarden)
+        .sort((a, b) => b[1] - a[1])[0][0];
+      const url = `${APP_URL}?garden=${primaryGardenId}`;
 
       try {
         await fcm.send({
           token,
           notification: { title, body },
-          data: { title, body, url },
+          data: { title, body, url, garden: primaryGardenId },
           android: {
             notification: {
               title, body,
@@ -111,7 +116,7 @@ exports.sulamaKontrol = onSchedule(
               icon: "https://salimoglu.github.io/bahcem/icons/icon-192.png",
               requireInteraction: true
             },
-            data: { url, title, body },
+            data: { url, title, body, garden: primaryGardenId },
             fcmOptions: { link: url }
           }
         });

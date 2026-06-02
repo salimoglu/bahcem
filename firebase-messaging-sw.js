@@ -18,21 +18,33 @@ messaging.onBackgroundMessage(payload => {
   const title = data.title || notif.title || '🌿 Bahçem';
   const body  = data.body  || notif.body  || 'Sulama zamanı!';
   const url   = data.url   || 'https://salimoglu.github.io/bahcem/';
+  const gardenId = data.garden || data.gardenId || '';
 
   return self.registration.showNotification(title, {
     body,
     icon:  '/bahcem/icons/icon-192.png',
     badge: '/bahcem/icons/icon-192.png',
     requireInteraction: true,
-    data:  { url }
+    data:  { url, gardenId }
   });
 });
+
+function openFromNotification(url, gardenId) {
+  return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) {
+      if (!c.url.includes('bahcem')) continue;
+      if (gardenId && c.postMessage) {
+        c.postMessage({ type: 'open-garden', gardenId });
+      }
+      if ('focus' in c) return c.focus();
+    }
+    return clients.openWindow(url);
+  });
+}
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const url = e.notification.data?.url || 'https://salimoglu.github.io/bahcem/';
-  e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list => {
-    for (const c of list) if (c.url.includes('bahcem') && 'focus' in c) return c.focus();
-    return clients.openWindow(url);
-  }));
+  const gardenId = e.notification.data?.gardenId || '';
+  e.waitUntil(openFromNotification(url, gardenId));
 });

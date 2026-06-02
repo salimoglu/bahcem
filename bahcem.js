@@ -100,6 +100,7 @@ const PREF_COMPACT = "bahcem-pref-compact";
 
 let currentUser = null, gardens = [], plants = [];
 let currentGardenId = null;
+let pendingGardenId = null;
 let unsubGardens = null, unsubPlants = null;
 let appWired = false;
 let selectedPlants = new Map(); // id → {dbPlant, interval, imageUrl}
@@ -275,6 +276,7 @@ function listenGardens() {
   unsubGardens = gardensCol().orderBy("createdAt","asc").onSnapshot(snap => {
     gardens = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderGardens();
+    tryOpenPendingGarden();
   });
 }
 
@@ -352,6 +354,21 @@ function openGarden(gid) {
   document.getElementById("garden-title-display").textContent = g ? g.name : "";
   showScreen("screen-plants");
   listenPlants(gid);
+}
+
+function tryOpenPendingGarden() {
+  if (!pendingGardenId || !currentUser) return;
+  const g = gardens.find(x => x.id === pendingGardenId);
+  if (g) {
+    openGarden(pendingGardenId);
+    pendingGardenId = null;
+  }
+}
+
+function queueGardenDeepLink(gardenId) {
+  if (!gardenId) return;
+  pendingGardenId = gardenId;
+  tryOpenPendingGarden();
 }
 
 // ─── BAHÇE MODAL ───
@@ -938,18 +955,21 @@ function wireOnce() {
   if (appWired) return;
   appWired = true;
 
-  // Bildirim tıklamasından gelen deep link
+  // Bildirim tıklamasından gelen deep link (?garden=...)
   const params = new URLSearchParams(window.location.search);
   const gardenParam = params.get("garden");
   if (gardenParam) {
-    // URL'i temizle
     window.history.replaceState({}, "", window.location.pathname);
-    // Bahçe yüklenince aç
-    const unsubDeep = setInterval(() => {
-      const g = gardens.find(g => g.id === gardenParam);
-      if (g) { clearInterval(unsubDeep); openGarden(gardenParam); }
-    }, 300);
-    setTimeout(() => clearInterval(unsubDeep), 5000);
+    queueGardenDeepLink(gardenParam);
+  }
+
+  // Açık sekmede bildirime tıklanınca service worker mesajı
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", e => {
+      if (e.data?.type === "open-garden" && e.data.gardenId) {
+        queueGardenDeepLink(e.data.gardenId);
+      }
+    });
   }
 
   // PLANTS_DB'yi bir kez sırala: Türkçe → Latince → İngilizce
