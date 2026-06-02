@@ -1050,7 +1050,9 @@ function renderCatalog(query, cat) {
 
 
   const grid = document.getElementById("plant-search-results");
-  if (!results.length) {
+  const customSeeds = [...selectedPlants.values()].filter(x => x.dbPlant.isSeed);
+
+  if (!results.length && !customSeeds.length) {
     grid.innerHTML = `<p style="grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px 0">Sonuç bulunamadı.</p>`;
     return;
   }
@@ -1061,7 +1063,20 @@ function renderCatalog(query, cat) {
   const displayResults = q ? results : results.slice(0, 300);
   const moreCount = q ? 0 : Math.max(0, results.length - 300);
 
-  grid.innerHTML = displayResults.map(p => {
+  // Seçili özel tohumlar (katalogda yok — grid'in en üstünde)
+  let gridHtml = "";
+  if (customSeeds.length) {
+    gridHtml += customSeeds.map(({ dbPlant, interval }) =>
+      `<button class="popular-plant-btn selected seed-custom-btn" data-custom-seed="${escA(dbPlant.id)}" type="button">
+        <span class="sel-check">✓</span>
+        <span class="popular-emoji">🌱</span>
+        <span class="popular-name">${esc(dbPlant.nameTr)}</span>
+        <span class="seed-interval-badge">${interval}g</span>
+      </button>`
+    ).join("");
+  }
+
+  gridHtml += displayResults.map(p => {
     const idx = PLANTS_DB.indexOf(p);
     const sel = selectedPlants.has(p.id);
     const inGarden = existingNames.has(p.nameTr.toLocaleLowerCase("tr"));
@@ -1077,20 +1092,7 @@ function renderCatalog(query, cat) {
     </button>`;
   }).join("");
 
-  // Seçili özel tohumlar (katalogda yok)
-  const customSeeds = [...selectedPlants.values()].filter(x => x.dbPlant.isSeed);
-  if (customSeeds.length) {
-    const seedBtns = customSeeds.map(({ dbPlant, interval }) =>
-      `<button class="popular-plant-btn selected seed-custom-btn" data-custom-seed="${escA(dbPlant.id)}" type="button">
-        <span class="sel-check">✓</span>
-        <span class="popular-emoji">🌱</span>
-        <span class="popular-name">${esc(dbPlant.nameTr)}</span>
-        <span class="seed-interval-badge">${interval}g</span>
-      </button>`
-    ).join("");
-    grid.innerHTML = seedBtns + grid.innerHTML;
-  }
-
+  grid.innerHTML = gridHtml;
   if (moreCount > 0) {
     grid.innerHTML += `<p class="catalog-more-hint">+ ${moreCount} bitki daha — aramak için yazmaya başlayın</p>`;
   }
