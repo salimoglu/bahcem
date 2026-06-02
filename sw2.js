@@ -33,8 +33,8 @@ function parsePushPayload(e) {
     const data  = d.data || {};
     const url = data.url || d.url || d.fcmOptions?.link || fallback.url;
     return {
-      title: notif.title || data.title || d.title || fallback.title,
-      body:  notif.body  || data.body  || d.body  || fallback.body,
+      title: data.title || notif.title || d.title || fallback.title,
+      body:  data.body  || notif.body  || d.body  || fallback.body,
       url,
       gardenId: data.garden || data.gardenId || gardenFromUrl(url)
     };

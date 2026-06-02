@@ -11,11 +11,12 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap"/>
-  <link rel="stylesheet" href="bahcem.css?v=1780342701"/>
+  <link rel="stylesheet" href="bahcem.css?v=1780342800"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
   <script src="plants_db.js"></script>
 </head>
 <body>
@@ -213,7 +214,7 @@
       <h2>Ayarlar</h2>
       <div class="settings-block">
         <h3 class="settings-heading">Sulama Bildirimleri</h3>
-        <p class="settings-hint">Bildirim iznini açın; saat ve aç/kapa ayarını her bahçe kartından yapabilirsiniz.</p>
+        <p class="settings-hint">1) Anahtarı açın 2) Bahçe kartında 🔔 işaretleyin 3) Saati seçin (test için şu anki saat)</p>
         <div class="settings-notif-row">
           <div id="notif-status-text" class="settings-notif-status">⏳ Kontrol ediliyor…</div>
           <label class="notif-toggle-wrap" id="notif-toggle-wrap" style="display:none">
@@ -221,6 +222,10 @@
             <span class="notif-toggle-slider"></span>
           </label>
         </div>
+        <p id="notif-detail-text" class="settings-notif-detail"></p>
+        <button type="button" class="btn btn-ghost btn-sm btn-block" id="btn-test-notif" style="display:none">
+          🔔 Test bildirimi gönder
+        </button>
       </div>
       <div class="settings-block">
         <h3 class="settings-heading">Görünüm</h3>
@@ -273,6 +278,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="bahcem.js?v=1780342700" defer></script>
+  <script src="bahcem.js?v=1780342800" defer></script>
 </body>
 </html>
