@@ -218,6 +218,56 @@ function fmtDate(iso) {
 }
 
 // ─── EKRAN GEÇİŞİ ───
+let lastExitPress = 0;
+let historyNavReady = false;
+
+function getActiveScreenId() {
+  const el = document.querySelector(".screen.active");
+  return el ? el.id : "screen-gardens";
+}
+
+function initAppHistory() {
+  history.replaceState({ bahcem: "gardens" }, "");
+  lastExitPress = 0;
+}
+
+function goBackToGardensList() {
+  if (unsubPlants) { unsubPlants(); unsubPlants = null; }
+  currentGardenId = null;
+  showScreen("screen-gardens");
+}
+
+function setupHistoryNavigation() {
+  if (historyNavReady) return;
+  historyNavReady = true;
+
+  window.addEventListener("popstate", e => {
+    if (!currentUser) return;
+    const app = document.getElementById("app-screen");
+    if (!app || app.style.display === "none") return;
+
+    const st = e.state;
+    if (st?.bahcem === "plants" && st.gardenId) {
+      openGarden(st.gardenId, true);
+      return;
+    }
+
+    if (getActiveScreenId() === "screen-plants") {
+      goBackToGardensList();
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastExitPress < 2000) {
+      lastExitPress = 0;
+      return;
+    }
+    lastExitPress = now;
+    toast("Çıkmak için tekrar geri basın");
+    history.pushState({ bahcem: "gardens" }, "");
+  });
+}
+
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => {
     s.classList.remove("hidden");
@@ -261,6 +311,7 @@ auth.onAuthStateChanged(user => {
     const emailEl = document.getElementById("settings-user-email");
     if (emailEl) emailEl.textContent = user.email || "";
     showApp("app-screen"); showScreen("screen-gardens");
+    initAppHistory();
     listenGardens(); applyCompactFromStorage(); wireOnce(); registerSw();
   } else {
     currentUser = null; gardens = []; plants = [];
@@ -347,13 +398,13 @@ function renderGardens() {
   });
 }
 
-function openGarden(gid) {
+function openGarden(gid, skipHistory) {
   currentGardenId = gid;
-  const currentGarden = gardens.find(g => g.id === gid);
   const g = gardens.find(x => x.id === gid);
   document.getElementById("garden-title-display").textContent = g ? g.name : "";
   showScreen("screen-plants");
   listenPlants(gid);
+  if (!skipHistory) history.pushState({ bahcem: "plants", gardenId: gid }, "");
 }
 
 function tryOpenPendingGarden() {
@@ -955,6 +1006,8 @@ function wireOnce() {
   if (appWired) return;
   appWired = true;
 
+  setupHistoryNavigation();
+
   // Bildirim tıklamasından gelen deep link (?garden=...)
   const params = new URLSearchParams(window.location.search);
   const gardenParam = params.get("garden");
@@ -986,10 +1039,9 @@ function wireOnce() {
     });
   })();
 
-  // Geri
+  // Geri (ekran içi buton = tarayıcı geri tuşu ile aynı)
   (document.getElementById("btn-back")||{addEventListener:()=>{}}).addEventListener("click", () => {
-    if (unsubPlants) { unsubPlants(); unsubPlants = null; }
-    showScreen("screen-gardens");
+    history.back();
   });
 
   // Bahçe
