@@ -1363,7 +1363,6 @@ function wireOnce() {
 
   // Ayarlar içindeki feedback gönder butonu
   (document.getElementById("btn-feedback-send")||{addEventListener:()=>{}}).addEventListener("click", submitFeedback);
-  (document.getElementById("btn-test-notif")||{addEventListener:()=>{}}).addEventListener("click", sendTestNotification);
 }
 
 // ─── FCM BİLDİRİMLER ───
@@ -1445,183 +1444,77 @@ function setupMessaging() {
   } catch (e) { console.warn("FCM onMessage:", e.message); }
 }
 
-async function enableAllGardenNotifs() {
-  if (!currentUser || !gardens.length) return;
-  const hour = getIstanbulHour();
-  try {
-    await Promise.all(gardens.map(g =>
-      gardensCol().doc(g.id).update({
-        notifOn: true,
-        notifHour: typeof g.notifHour === "number" ? g.notifHour : hour
-      })
-    ));
-  } catch (e) { console.warn("Bahçe bildirimleri:", e.message); }
-}
-
 async function registerSw() {
   if (!("serviceWorker" in navigator)) return;
   try {
     setupMessaging();
     const reg = await ensureSw2Registration();
     await reg.update();
-    if (Notification.permission === "granted") {
-      await saveFcmToken();
-    }
+    if (Notification.permission === "granted") await saveFcmToken();
   } catch (e) { console.warn("SW:", e.message); }
 }
 
 async function requestNotifPermission() {
   if (!("Notification" in window)) {
-    toast("Bu tarayıcı bildirimleri desteklemiyor"); return false;
+    toast("Bu tarayıcı bildirimleri desteklemiyor"); return;
   }
   if (Notification.permission === "denied") {
-    toast("Bildirimler engellendi — tarayıcı ayarlarından izin verin"); return false;
+    toast("Bildirimler engellendi — tarayıcı ayarlarından izin verin"); return;
   }
   const perm = await Notification.requestPermission();
-  if (perm !== "granted") return false;
+  if (perm !== "granted") return;
   localStorage.removeItem("notif-disabled");
-  const ok = await saveFcmToken();
-  if (ok) {
-    await enableAllGardenNotifs();
-    toast("✅ Bildirimler açık! Bahçe saatlerini kartlardan ayarlayabilirsiniz.");
-  } else {
-    toast("İzin verildi ama token kaydı başarısız — Test bildirimi ile tekrar deneyin");
-  }
+  await saveFcmToken();
+  toast("✅ Bildirimler açık! Sulama zamanı gelince haber vereceğiz.");
   updateNotifStatus();
-  return ok;
 }
 
 async function saveFcmToken() {
-  if (!currentUser || Notification.permission !== "granted") return false;
-  if (localStorage.getItem("notif-disabled") === "1") return false;
+  if (!currentUser || Notification.permission !== "granted") return;
+  if (localStorage.getItem("notif-disabled") === "1") return;
   try {
     const messaging = firebase.messaging();
     const swReg = await ensureSw2Registration();
     const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: swReg });
-    if (!token) {
-      toast("FCM token alınamadı — sayfayı yenileyin");
-      return false;
-    }
+    if (!token) return;
     const now = new Date().toISOString();
     await db.collection("users").doc(currentUser.uid)
       .collection("settings").doc("fcm")
       .set({ token, updatedAt: now });
     await db.collection("fcm_tokens").doc(currentUser.uid)
-      .set({ token, uid: currentUser.uid, disabled: false, updatedAt: now });
-    return true;
-  } catch (e) {
-    console.warn("FCM token:", e.message);
-    toast("Token hatası: " + e.message);
-    return false;
-  }
+      .set({ token, uid: currentUser.uid, updatedAt: now });
+  } catch (e) { console.warn("FCM token alınamadı:", e.message); }
 }
 
-async function updateNotifStatus() {
+function updateNotifStatus() {
   const st   = document.getElementById("notif-status-text");
   const wrap = document.getElementById("notif-toggle-wrap");
   const chk  = document.getElementById("notif-toggle-check");
-  const detail = document.getElementById("notif-detail-text");
-  const testBtn = document.getElementById("btn-test-notif");
   if (!st) return;
 
   if (!("Notification" in window)) {
     st.textContent = "❌ Bu cihaz bildirimleri desteklemiyor";
     if (wrap) wrap.style.display = "none";
-    if (testBtn) testBtn.style.display = "none";
     return;
   }
 
   const isOn = globalNotifEnabled();
-  let tokenOk = false;
-  if (currentUser && Notification.permission === "granted" && localStorage.getItem("notif-disabled") !== "1") {
-    try {
-      const doc = await db.collection("fcm_tokens").doc(currentUser.uid).get();
-      tokenOk = doc.exists && !!doc.data()?.token && !doc.data()?.disabled;
-    } catch (_) {}
-  }
-
-  if (Notification.permission === "denied") {
-    st.textContent = "❌ Bildirimler engelli";
-  } else if (isOn && tokenOk) {
-    st.textContent = "✅ Bildirimler açık";
-  } else if (Notification.permission === "granted") {
-    st.textContent = "⚠️ Token kaydı eksik";
-  } else {
-    st.textContent = "🔔 Bildirimler kapalı";
-  }
-
-  if (wrap) wrap.style.display = Notification.permission === "denied" ? "none" : "block";
-  if (chk) { chk.checked = isOn && tokenOk; chk.onchange = null; chk.onchange = handleNotifToggle; }
-
-  if (detail) {
-    if (Notification.permission === "denied") {
-      detail.textContent = "Tarayıcı/site ayarlarından bildirim iznini açın.";
-    } else if (!isOn || !tokenOk) {
-      detail.textContent = "Anahtarı açın veya 'Test bildirimi' ile token kaydını yenileyin.";
-    } else {
-      const active = gardens.filter(g => g.notifOn).length;
-      const hour = getIstanbulHour();
-      detail.textContent = active
-        ? `${active} bahçede bildirim açık. Test için saati ${String(hour).padStart(2,"0")}:00 yapın; sulanması gereken bitki olmalı.`
-        : "Bahçe listesinde 🔔 Bildirimi açın ve saat seçin.";
-    }
-  }
-
-  if (testBtn) {
-    testBtn.style.display = Notification.permission === "granted" ? "block" : "none";
-  }
-}
-
-async function sendTestNotification() {
-  if (Notification.permission !== "granted") {
-    const ok = await requestNotifPermission();
-    if (!ok) return;
-  }
-  localStorage.removeItem("notif-disabled");
-  const saved = await saveFcmToken();
-  if (!saved) return;
-
-  try {
-    const fn = firebase.app().functions("europe-west1").httpsCallable("sendTestNotification");
-    await fn();
-    toast("Test bildirimi gönderildi — birkaç saniye bekleyin");
-  } catch (e) {
-    const msg = e.message || e.code || "Bilinmeyen hata";
-    if (msg.includes("failed-precondition") || msg.includes("not-found") || msg.includes("internal")) {
-      await showPushNotification(
-        "🌿 Bahçem — Yerel Test",
-        "Sunucu henüz hazır değil; yerel bildirim çalışıyor.",
-        APP_URL,
-        ""
-      );
-      toast("Yerel test gösterildi. Cloud Function deploy edilmeli.");
-    } else {
-      toast("Test hatası: " + msg);
-    }
-  }
-  updateNotifStatus();
+  st.textContent = isOn ? "✅ Bildirimler açık" : "🔔 Bildirimler kapalı";
+  if (wrap) wrap.style.display = "block";
+  if (chk)  { chk.checked = isOn; chk.onchange = null; chk.onchange = handleNotifToggle; }
 }
 
 async function handleNotifToggle() {
   const chk = document.getElementById("notif-toggle-check");
   if (chk.checked) {
     localStorage.removeItem("notif-disabled");
-    if (Notification.permission !== "granted") {
-      const ok = await requestNotifPermission();
-      if (!ok) { chk.checked = false; updateNotifStatus(); return; }
-    } else {
-      const ok = await saveFcmToken();
-      if (ok) await enableAllGardenNotifs();
-      if (!ok) { chk.checked = false; updateNotifStatus(); return; }
-      toast("Bildirimler açıldı ✓");
-    }
+    if (Notification.permission !== "granted") await requestNotifPermission();
+    else await saveFcmToken();
+    toast("Bildirimler açıldı ✓");
   } else {
     if (currentUser) {
       await db.collection("users").doc(currentUser.uid).collection("settings").doc("fcm").delete().catch(() => {});
-      await db.collection("fcm_tokens").doc(currentUser.uid).set(
-        { disabled: true, updatedAt: new Date().toISOString() },
-        { merge: true }
-      ).catch(() => {});
+      await db.collection("fcm_tokens").doc(currentUser.uid).delete().catch(() => {});
     }
     localStorage.setItem("notif-disabled", "1");
     toast("Bildirimler kapatıldı ✓");
@@ -1631,7 +1524,7 @@ async function handleNotifToggle() {
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && currentUser && globalNotifEnabled()) {
-    saveFcmToken().then(() => updateNotifStatus());
+    saveFcmToken();
   }
 });
 
