@@ -358,12 +358,7 @@ button:active, .btn:active { transform: scale(0.97); }
   color: var(--muted);
   font-weight: 600;
 }
-@media (min-width: 600px) {
-  .plant-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
-}
-@media (min-width: 900px) {
-  .plant-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; }
-}
+/* Bitki grid sütun sayısı — mobil varsayılan (4) korunur; masaüstü dosya sonunda */
 
 .plant-grid-loading {
   min-height: 100px;
@@ -2296,4 +2291,260 @@ code { font-size:0.85em; background:var(--surface2); padding:2px 6px; border-rad
 }
 .notif-toggle-input:checked + .notif-toggle-slider::before {
   transform: translateX(22px);
+}
+
+/* =====================================================
+   MASAÜSTÜ / WEB (768px+) — telefon görünümü aynı kalır
+   ===================================================== */
+@media (min-width: 768px) {
+  .wrap {
+    max-width: 1080px;
+    padding: 24px 32px 40px;
+  }
+
+  .top-bar {
+    padding: 8px 28px;
+  }
+
+  .top-bar-brand {
+    font-size: 1.15rem;
+    gap: 10px;
+  }
+
+  .top-bar-brand img {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .screen-title {
+    font-size: 1.45rem;
+  }
+
+  .screen-title-row {
+    margin-bottom: 18px;
+  }
+
+  .btn-sm {
+    padding: 9px 18px;
+    font-size: 0.95rem;
+  }
+
+  .garden-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .garden-card {
+    padding: 18px 22px;
+    gap: 16px;
+    border-radius: 16px;
+  }
+
+  .garden-card-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 2.4rem;
+    border-radius: 16px;
+  }
+
+  .garden-card-body h3 {
+    font-size: 1.2rem;
+  }
+
+  .garden-card-sub {
+    font-size: 0.95rem;
+  }
+
+  .garden-card-stats {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .gc-stat {
+    font-size: 0.82rem;
+    padding: 3px 10px;
+  }
+
+  .plants-header {
+    padding: 12px 0 16px;
+    gap: 14px;
+  }
+
+  .btn-back {
+    font-size: 0.95rem;
+    padding: 8px 8px;
+  }
+
+  .garden-title-text {
+    font-size: 1.35rem;
+  }
+
+  .plant-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .plant-card {
+    border-radius: 12px;
+    border-width: 2px;
+  }
+
+  .plant-card-holding::after {
+    font-size: 3.2rem;
+  }
+
+  .plant-meta {
+    padding: 8px 10px 10px;
+    gap: 4px;
+  }
+
+  .plant-meta h3 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+
+  .plant-meta .badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+  }
+
+  .plant-meta .info-badge {
+    font-size: 0.68rem;
+    padding: 2px 7px;
+  }
+
+  .plant-thumb.placeholder {
+    font-size: 3.5rem;
+  }
+
+  .plant-hold-hint {
+    font-size: 0.9rem;
+    margin-top: 16px;
+  }
+
+  .empty h2 {
+    font-size: 1.35rem;
+  }
+
+  .empty p {
+    font-size: 1.05rem;
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+  }
+
+  .modal {
+    width: min(640px, 100%);
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .modal-top {
+    max-width: 720px;
+    margin: 0 auto;
+    border-radius: 0 0 20px 20px !important;
+  }
+
+  .modal-top-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .modal-top .plant-search-input {
+    font-size: 1rem;
+    padding: 12px 16px;
+  }
+
+  .modal-top .plant-search-grid,
+  .plant-search-grid {
+    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 10px;
+    max-height: 340px;
+  }
+
+  .popular-plant-btn {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    border-radius: 12px;
+  }
+
+  .popular-emoji {
+    font-size: 1.85rem;
+  }
+
+  .popular-name {
+    font-size: 0.78rem;
+  }
+
+  .cat-tab {
+    font-size: 0.82rem;
+    padding: 6px 12px;
+  }
+
+  .modal-seed-quick {
+    width: min(420px, 92vw);
+    padding: 22px;
+  }
+
+  .seed-modal-title {
+    font-size: 1.15rem;
+  }
+
+  .seed-name-input {
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .modal-detail-sheet {
+    max-width: 560px;
+  }
+
+  .plant-preview-card {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .ppc-img-wrap {
+    width: 88px;
+    height: 88px;
+    border-radius: 12px;
+  }
+
+  #app-screen.app-compact .wrap {
+    padding: 20px 28px 32px;
+  }
+
+  #app-screen.app-compact .garden-grid {
+    gap: 12px;
+  }
+
+  #app-screen.app-compact .plant-grid {
+    gap: 12px;
+  }
+
+  #app-screen.app-compact .plant-meta h3 {
+    font-size: 0.9rem;
+  }
+
+  #app-screen.app-compact .plant-thumb.placeholder {
+    font-size: 3rem;
+  }
+
+  #app-screen.app-compact .garden-card {
+    padding: 14px 18px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .garden-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .plant-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+  }
 }
